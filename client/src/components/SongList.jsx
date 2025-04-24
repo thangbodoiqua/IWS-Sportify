@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState, useRef } from 'react';
 import { AppContext } from '../context/AppContext';
-import { FaPlay } from 'react-icons/fa';
+import { FaPlay, FaPlus } from 'react-icons/fa'; // Import icon
 
-const SongList = () => {
+const SongList = ({ onOpenPlaylistModal }) => {
     const { value } = useContext(AppContext);
     const { backendUrl, setCurrentSong } = value;
     const [songs, setSongs] = useState([]);
@@ -42,14 +42,7 @@ const SongList = () => {
         <div className="flex items-center justify-center p-10 text-white">Loading songs...</div>
     ) : (
         <div className="relative p-6 h-[260px] w-[600px]">
-            <button
-                onClick={() => scroll('left')}
-                className="cursor-pointer absolute left-2 top-1/2 transform -translate-y-1/2 z-10 bg-gray-700 text-white p-2 rounded-full shadow-lg transition-all duration-300 hover:bg-gray-500 hover:scale-110 hover:shadow-2xl"
-            >
-                ◀
-            </button>
-
-
+            {/* ... (hai nút scroll giữ nguyên) */}
             <div
                 ref={scrollRef}
                 className="flex gap-4 overflow-x-auto scroll-smooth no-scrollbar"
@@ -58,7 +51,6 @@ const SongList = () => {
                     <div
                         key={song._id}
                         className="cursor-pointer min-w-[160px] max-w-[160px] h-[220px] bg-gray-800 rounded-xl overflow-hidden shadow-lg flex-shrink-0 relative group"
-                        onClick={() => handleSongSelect(song)}
                     >
                         <img
                             src={song.imageUrl}
@@ -72,17 +64,16 @@ const SongList = () => {
                             <h3 className="text-sm font-semibold text-white truncate">{song.title}</h3>
                             <p className="text-xs text-gray-400 truncate">{song.artist}</p>
                         </div>
+                        <button
+                            onClick={() => onOpenPlaylistModal(song)} // Sử dụng hàm từ props
+                            className="absolute top-2 right-2 text-gray-400 hover:text-white focus:outline-none"
+                        >
+                            <FaPlus className="w-5 h-5" />
+                        </button>
                     </div>
                 ))}
             </div>
-
-            <button
-                onClick={() => scroll('right')}
-                className=" cursor-pointer absolute right-2 top-1/2 transform -translate-y-1/2 z-10 bg-gray-700 text-white p-2 rounded-full shadow-lg transition-all duration-300 hover:bg-gray-500 hover:scale-110 hover:shadow-2xl"
-            >
-                ▶
-            </button>
-
+            {/* ... (nút scroll phải giữ nguyên) */}
         </div>
     );
 };

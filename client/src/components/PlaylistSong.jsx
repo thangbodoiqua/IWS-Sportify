@@ -10,7 +10,7 @@ import axiosInstance from "../AxiosInstance";
 import { useNavigate } from 'react-router-dom'; // Import useNavigate để điều hướng
 
 const PlaylistSong = ({ playlist, onBack, onSongRemoved }) => {
-    const { setCurrentSong, backendUrl, fetchPlaylists } = useContext(AppContext).value;
+    const { setCurrentSong, backendUrl, fet } = useContext(AppContext).value;
     const [hoveredSongId, setHoveredSongId] = useState(null);
     const [songs, setSongs] = useState(playlist.songs || []);
     const [isModalOpen, setIsModalOpen] = useState(false); // Modal xóa bài hát

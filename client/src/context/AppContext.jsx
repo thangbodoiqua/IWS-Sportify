@@ -9,7 +9,7 @@ export const AppContextProvider = (props) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [user, setUser] = useState(false);
     const [currentSong, setCurrentSong] = useState(null);
-    const [playlists, setPlaylists] = useState([]); // State cho playlists
+    const [playlists, setPlaylists] = useState([]); // State for playlists
 
     const getAuthState = async () => {
         try {
@@ -17,15 +17,15 @@ export const AppContextProvider = (props) => {
             if (data.success) {
                 setIsLoggedIn(true);
                 getUserData();
-                fetchPlaylists(); // Gọi fetchPlaylists sau khi đăng nhập
+                fetchPlaylists(); // Call fetchPlaylists after login
             } else {
                 setIsLoggedIn(false);
-                setPlaylists([]); // Reset playlists khi chưa đăng nhập
+                setPlaylists([]); // Reset playlists when not logged in
             }
         } catch (error) {
             toast.error(error.message);
             setIsLoggedIn(false);
-            setPlaylists([]); // Reset playlists khi có lỗi
+            setPlaylists([]); // Reset playlists on error
         }
     }
 
@@ -56,14 +56,40 @@ export const AppContextProvider = (props) => {
         }
     };
 
+    const filterPlaylistsContainingSong = (song) => {
+        if (!song) {
+            return playlists;
+        }
+        return playlists.filter(playlist => !playlist.songs.some(s => s._id === song._id));
+    };
+
+    const addSongToPlaylist = async (playlistId, songId) => {
+        try {
+            const response = await axiosInstance.post('/api/playlist/add-song', { playlistId, songId });
+            if (response.data.success) {
+                toast.success(response.data.message);
+                // Cập nhật lại danh sách playlists sau khi thêm bài hát thành công
+                fetchPlaylists();
+            } else {
+                toast.error(response.data.message);
+            }
+        } catch (error) {
+            const message = error.response?.data?.message || error.message || "Failed to add song to playlist.";
+            toast.error(message);
+            console.error("Error adding song to playlist:", error);
+        }
+    };
+
     const value = {
         backendUrl,
         isLoggedIn, setIsLoggedIn,
         user, setUser,
         getUserData,
         currentSong, setCurrentSong,
-        playlists, setPlaylists, // Chia sẻ state playlists
-        fetchPlaylists // Chia sẻ hàm fetchPlaylists
+        playlists, setPlaylists, // Share playlists state
+        fetchPlaylists, // Share fetchPlaylists function
+        filterPlaylistsContainingSong, // Share filter function
+        addSongToPlaylist // Share add song function
     };
 
     return (
