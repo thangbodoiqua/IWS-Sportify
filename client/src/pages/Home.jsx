@@ -30,6 +30,8 @@ const Home = () => {
 
     const handlePlaylistSelect = (playlist) => {
         setSelectedPlaylist(playlist);
+        console.log('Playlist selected in Home:', playlist);
+        // Không cần fetch lại dữ liệu ở đây, PlaylistSong sẽ tự xử lý khi prop playlist thay đổi
     };
 
     const handleBackToSongList = () => {
@@ -55,14 +57,24 @@ const Home = () => {
                 </div>
                 <div className='mt-0 flex-grow p-4 overflow-y-auto'> {/* Cho phép cuộn dọc cho nội dung chính */}
                     {selectedPlaylist ? (
-                        <PlaylistSong playlist={selectedPlaylist} onBack={handleBackToSongList} />
+                        <PlaylistSong
+                            playlist={selectedPlaylist}
+                            onBack={handleBackToSongList}
+                            onSongRemoved={(removedSongId) => {
+                                // Cập nhật lại selectedPlaylist.songs khi một bài hát bị xóa
+                                setSelectedPlaylist(prevPlaylist => ({
+                                    ...prevPlaylist,
+                                    songs: prevPlaylist.songs.filter(song => song._id !== removedSongId),
+                                }));
+                            }}
+                        />
                     ) : (
-                        <SongList onOpenPlaylistModal={openPlaylistModal} /> 
+                        <SongList onOpenPlaylistModal={openPlaylistModal} />
                     )}
                 </div>
             </div>
-            {isPlaylistModalVisible && (
-                <Playlist song={songToAdd} onClose={closePlaylistModal} /> 
+            {isPlaylistModalVisible && songToAdd && (
+                <Playlist song={songToAdd} onClose={closePlaylistModal} />
             )}
             {currentSong && <Player onOpenPlaylistModal={openPlaylistModal} song={currentSong} />} {/* Truyền hàm mở modal */}
         </div>

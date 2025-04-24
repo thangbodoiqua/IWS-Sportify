@@ -1,0 +1,40 @@
+// path: server/src/routes/albumRoute.js
+
+import express from 'express';
+import { adminAuth } from '../middleware/authMiddleware.js'; // Sử dụng adminAuth để quản lý album
+import {
+  createAlbum,
+  deleteAlbum,
+  addSongToAlbum,
+  removeSongFromAlbum,
+  getAllAlbums,
+  getAlbumById,
+  updateAlbum,
+} from '../controllers/albumController.js';
+
+const albumRoute = express.Router();
+
+albumRoute.use(adminAuth); // Chỉ admin mới có quyền quản lý album
+
+// Route để tạo album mới (có middleware xử lý file)
+albumRoute.post('/create-album', createAlbum);
+
+// Route để xóa album theo ID
+albumRoute.delete('/:albumId', deleteAlbum);
+
+// Route để thêm bài hát vào album
+albumRoute.post('/add-song', addSongToAlbum);
+
+// Route để xóa bài hát khỏi album
+albumRoute.post('/remove-song', removeSongFromAlbum);
+
+// Route để lấy thông tin tất cả các album
+albumRoute.get('/', getAllAlbums);
+
+// Route để lấy thông tin chi tiết của một album theo ID
+albumRoute.get('/:albumId', getAlbumById);
+
+// Route để cập nhật thông tin của một album (có middleware xử lý file)
+albumRoute.put('/:albumId', updateAlbum);
+
+export default albumRoute;

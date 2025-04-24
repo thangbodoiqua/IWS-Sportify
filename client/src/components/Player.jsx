@@ -7,8 +7,10 @@ import {
     Repeat,
     Volume2,
     VolumeX,
+    Plus, // Import icon Plus
 } from 'lucide-react';
 import { AppContext } from '../context/AppContext'; // Import AppContext
+import Playlist from '../components/Playlist'; // Import Playlist component
 
 const Player = () => {
     const audioRef = useRef(null);
@@ -20,6 +22,7 @@ const Player = () => {
     const [isRepeat, setIsRepeat] = useState(false);
     const { value } = useContext(AppContext); // Sử dụng AppContext
     const { currentSong } = value;
+    const [isAddToPlaylistModalOpen, setIsAddToPlaylistModalOpen] = useState(false);
 
     useEffect(() => {
         if (!currentSong) return;
@@ -134,6 +137,16 @@ const Player = () => {
         };
     }, [togglePlay]); // Thêm togglePlay vào dependencies để đảm bảo nó luôn là phiên bản mới nhất
 
+    // Hàm mở modal "Thêm vào playlist"
+    const openAddToPlaylistModal = () => {
+        setIsAddToPlaylistModalOpen(true);
+    };
+
+    // Hàm đóng modal "Thêm vào playlist"
+    const closeAddToPlaylistModal = () => {
+        setIsAddToPlaylistModalOpen(false);
+    };
+
     if (!currentSong) {
         return (
             <div className="fixed bottom-0 left-0 w-full h-24 bg-gray-900 text-white flex items-center justify-center px-20 gap-4 z-50 shadow-md">
@@ -149,7 +162,7 @@ const Player = () => {
                     <source src={currentSong.audioUrl} type="audio/mpeg" />
                 </audio>
 
-                <div className="flex gap-4">
+                <div className="flex items-center gap-4">
                     <img
                         src={currentSong.imageUrl}
                         alt={currentSong.title}
@@ -159,6 +172,14 @@ const Player = () => {
                         <p className="truncate font-semibold text-lg">{currentSong.title}</p>
                         <p className="text-sm text-gray-400 truncate">{currentSong.artist}</p>
                     </div>
+                    {/* Button "Thêm vào playlist" */}
+                    <button
+                        onClick={openAddToPlaylistModal}
+                        className="text-blue-500 hover:text-blue-400 focus:outline-none"
+                        aria-label={`Add ${currentSong.title} to playlist`}
+                    >
+                        <Plus className="w-5 h-5" />
+                    </button>
                 </div>
 
                 <div className="w-[60%] flex items-center">
@@ -234,6 +255,10 @@ const Player = () => {
                     </div>
                 </div>
             </div>
+            {/* Modal "Thêm vào playlist" */}
+            {isAddToPlaylistModalOpen && currentSong && (
+                <Playlist song={currentSong} onClose={closeAddToPlaylistModal} />
+            )}
         </div>
     );
 };

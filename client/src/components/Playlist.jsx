@@ -1,104 +1,48 @@
-import React, { useRef, useState, useEffect, useContext } from 'react';
-import {
-    Play,
-    Pause,
-    SkipForward,
-    SkipBack,
-    Repeat,
-    Volume2,
-    VolumeX,
-    Plus // Import icon Plus
-} from 'lucide-react';
-import { AppContext } from '../context/AppContext'; // Import AppContext
+import React, { useContext } from 'react';
+import { AppContext } from '../context/AppContext';
+import { X } from 'lucide-react';
 
-const Player = ({ song: currentSong, onOpenPlaylistModal }) => { // Nhận onOpenPlaylistModal từ props
-    const audioRef = useRef(null);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [currentTime, setCurrentTime] = useState(0);
-    const [duration, setDuration] = useState(0);
-    const [isMuted, setIsMuted] = useState(false);
-    const [currentVolume, setCurrentVolume] = useState(1);
-    const [isRepeat, setIsRepeat] = useState(false);
-    const { value } = useContext(AppContext); // Sử dụng AppContext
+const Playlist = ({ song, onClose: onClosePlaylist }) => { // Đổi tên prop onClose
+    const { value } = useContext(AppContext);
+    const { filterPlaylistsContainingSong, addSongToPlaylist } = value;
 
-    useEffect(() => {
-        // ... (phần useEffect giữ nguyên)
-    }, [currentSong, isRepeat]);
+    const filteredPlaylists = filterPlaylistsContainingSong(song);
 
-    useEffect(() => {
-        // ... (phần useEffect xử lý repeat khi kết thúc bài hát giữ nguyên)
-    }, [isRepeat, isPlaying, currentTime, duration, currentSong]);
-
-    const togglePlay = () => {
-        // ... (phần togglePlay giữ nguyên)
+    const handleAddToPlaylist = (playlistId) => {
+        if (song) {
+            addSongToPlaylist(playlistId, song._id);
+            onClosePlaylist(); // Sử dụng tên prop mới
+        }
     };
-
-    const handleSeek = (e) => {
-        // ... (phần handleSeek giữ nguyên)
-    };
-
-    const handleVolumeChange = (e) => {
-        // ... (phần handleVolumeChange giữ nguyên)
-    };
-
-    const clickSoundIcon = () => {
-        // ... (phần clickSoundIcon giữ nguyên)
-    };
-
-    const formatTime = (secs) => {
-        // ... (phần formatTime giữ nguyên)
-    };
-
-    useEffect(() => {
-        // ... (phần useEffect xử lý phím space giữ nguyên)
-    }, [togglePlay]);
-
-    if (!currentSong) {
-        // ... (phần hiển thị khi không có bài hát được chọn giữ nguyên)
-        return (
-            <div className="fixed bottom-0 left-0 w-full h-24 bg-gray-900 text-white flex items-center justify-center px-20 gap-4 z-50 shadow-md">
-                <p>No song selected.</p>
-            </div>
-        );
-    }
 
     return (
-        <div className="fixed bottom-0 left-0 w-full h-24 bg-gray-900 text-white flex items-center justify-between px-20 gap-4 z-50 shadow-md">
-            <div className="flex items-center justify-between gap-4 w-full">
-                <audio ref={audioRef}>
-                    <source src={currentSong.audioUrl} type="audio/mpeg" />
-                </audio>
-
-                <div className="flex gap-4">
-                    <img
-                        src={currentSong.imageUrl}
-                        alt={currentSong.title}
-                        className="w-16 h-16 rounded-md shadow"
-                    />
-                    <div className="flex flex-col">
-                        <p className="truncate font-semibold text-lg">{currentSong.title}</p>
-                        <p className="text-sm text-gray-400 truncate">{currentSong.artist}</p>
-                    </div>
-                </div>
-
-                <div className="w-[60%] flex items-center">
-                    {/* ... (các nút điều khiển nhạc giữ nguyên) */}
-                </div>
-
-                <div className="flex items-center gap-4">
-                    {/* ... (các nút repeat, volume giữ nguyên) */}
-
-                    {/* Add to Playlist Icon */}
-                    <button
-                        onClick={() => onOpenPlaylistModal(currentSong)} // Sử dụng hàm từ props
-                        className="text-gray-400 hover:text-white focus:outline-none"
-                    >
-                        <Plus className="w-5 h-5" />
+        <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-gray-900 p-6 rounded-md shadow-lg w-96">
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-white font-semibold">Add to Playlist</h2>
+                    <button onClick={onClosePlaylist} className="text-gray-400 hover:text-white focus:outline-none"> {/* Sử dụng tên prop mới */}
+                        <X className="w-5 h-5" />
                     </button>
                 </div>
+                {filteredPlaylists.length > 0 ? (
+                    <ul>
+                        {filteredPlaylists.map(playlist => (
+                            <li key={playlist._id} className="py-2 border-b border-gray-800 last:border-b-0">
+                                <button
+                                    onClick={() => handleAddToPlaylist(playlist._id)}
+                                    className="text-white hover:text-green-500 focus:outline-none w-full text-left"
+                                >
+                                    {playlist.name}
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p className="text-gray-400">No playlists available to add this song.</p>
+                )}
             </div>
         </div>
     );
 };
 
-export default Player;
+export default Playlist;

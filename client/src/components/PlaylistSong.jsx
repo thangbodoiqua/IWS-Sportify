@@ -1,26 +1,30 @@
 import React, { useContext, useState, useRef, useEffect } from "react";
 import { AppContext } from "../context/AppContext";
-import { FaPlay, FaTrash } from "react-icons/fa";
+import { FaPlay, FaTrash, FaPlus } from "react-icons/fa"; // Import FaPlus
 import { IoArrowBackOutline } from "react-icons/io5";
 import { HiOutlineDotsHorizontal } from "react-icons/hi";
-import { GoPersonAdd } from "react-icons/go";
 import { assets } from "../assets/resources/assets";
 import { toast } from "react-toastify";
 import axiosInstance from "../AxiosInstance";
-import { useNavigate } from 'react-router-dom'; // Import useNavigate để điều hướng
+import { useNavigate } from 'react-router-dom';
+import Playlist from "./Playlist"; // Import Playlist component
 
 const PlaylistSong = ({ playlist, onBack, onSongRemoved }) => {
-    const { setCurrentSong, backendUrl, fet } = useContext(AppContext).value;
+    const { setCurrentSong, backendUrl, fetchPlaylists } = useContext(AppContext).value;
     const [hoveredSongId, setHoveredSongId] = useState(null);
-    const [songs, setSongs] = useState(playlist.songs || []);
+    const [songs, setSongs] = useState([]); // Khởi tạo là một mảng rỗng
     const [isModalOpen, setIsModalOpen] = useState(false); // Modal xóa bài hát
     const [songToRemove, setSongToRemove] = useState(null);
 
     const [isOptionsMenuOpen, setIsOptionsMenuOpen] = useState(false);
     const optionsMenuRef = useRef(null);
-    const navigate = useNavigate(); // Khởi tạo useNavigate
+    const navigate = useNavigate();
 
-    const [isDeletePlaylistModalOpen, setIsDeletePlaylistModalOpen] = useState(false); // Modal xóa playlist
+    const [isDeletePlaylistModalOpen, setIsDeletePlaylistModalOpen] = useState(false);
+
+    // State và hàm cho modal "Thêm vào playlist"
+    const [isAddToPlaylistModalOpen, setIsAddToPlaylistModalOpen] = useState(false);
+    const [selectedSongToAdd, setSelectedSongToAdd] = useState(null);
 
     const toggleOptionsMenu = () => {
         setIsOptionsMenuOpen(!isOptionsMenuOpen);
@@ -38,6 +42,15 @@ const PlaylistSong = ({ playlist, onBack, onSongRemoved }) => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [optionsMenuRef]);
+
+    // *** useEffect quan trọng để cập nhật songs khi playlist thay đổi ***
+    useEffect(() => {
+        if (playlist && playlist.songs) {
+            setSongs(playlist.songs);
+        } else {
+            setSongs([]); // Đảm bảo reset state khi playlist là null hoặc không có songs
+        }
+    }, [playlist]); // Chạy effect này mỗi khi prop 'playlist' thay đổi
 
     const handleSongSelect = (song) => {
         setCurrentSong(song);
@@ -89,9 +102,21 @@ const PlaylistSong = ({ playlist, onBack, onSongRemoved }) => {
         }
     };
 
+    // Hàm mở modal "Thêm vào playlist"
+    const openAddToPlaylistModal = (song) => {
+        setSelectedSongToAdd(song);
+        setIsAddToPlaylistModalOpen(true);
+    };
+
+    // Hàm đóng modal "Thêm vào playlist"
+    const closeAddToPlaylistModal = () => {
+        setIsAddToPlaylistModalOpen(false);
+        setSelectedSongToAdd(null);
+    };
+
     // Hàm mở modal xác nhận xóa playlist
     const openDeleteConfirmationModal = () => {
-        setIsOptionsMenuOpen(false); // Đóng menu options
+        setIsOptionsMenuOpen(false);
         setIsDeletePlaylistModalOpen(true);
     };
 
@@ -107,15 +132,15 @@ const PlaylistSong = ({ playlist, onBack, onSongRemoved }) => {
             return;
         }
         try {
-          console.log("Deleting playlist with ID:", playlist._id); // Debug log
+            console.log("Deleting playlist with ID:", playlist._id); // Debug log
             const response = await axiosInstance.delete(
                 `${backendUrl}/api/playlist/${playlist._id}`
             );
             console.log("Delete response:", response); // Debug log
             if (response.data.success) {
                 toast.success("Playlist deleted successfully!");
-                fetchPlaylists()
-                onBack()
+                fetchPlaylists();
+                onBack();
             } else {
                 toast.error(response.data.message || "Failed to delete playlist.");
             }
@@ -126,7 +151,7 @@ const PlaylistSong = ({ playlist, onBack, onSongRemoved }) => {
             setIsDeletePlaylistModalOpen(false); // Đóng modal sau khi thực hiện
         }
     };
-
+    
     return (
         <div className="text-white bg-gradient-to-b from-neutral-800 to-black p-4 rounded-lg relative">
             <div className=" flex justify-between">
@@ -147,7 +172,7 @@ const PlaylistSong = ({ playlist, onBack, onSongRemoved }) => {
                     {isOptionsMenuOpen && (
                         <div className="absolute top-full right-0 mt-0 w-48 bg-neutral-800 rounded-md shadow-lg z-10">
                             <button
-                                onClick={openDeleteConfirmationModal} // Gọi hàm mở modal xác nhận
+                                onClick={openDeleteConfirmationModal}
                                 className="block w-full text-left px-4 py-2 text-neutral-300 hover:bg-neutral-700 hover:text-white focus:outline-none"
                             >
                                 Delete Playlist
@@ -262,16 +287,23 @@ const PlaylistSong = ({ playlist, onBack, onSongRemoved }) => {
                                 <div className="hidden md:block text-sm text-neutral-400 truncate w-[150px] text-center">
                                     {song.album || ""}
                                 </div>
-                                <div className="flex items-center gap-4 min-w-[100px] justify-end">
+                                <div className="flex items-center gap-4 min-w-[130px] justify-end">
                                     <div className="text-sm text-neutral-400 text-right w-12">
                                         {song.duration
-                                            ? `${Math.floor(song.duration / 60)}:${(
+                                            ? `<span class="math-inline">\{Math\.floor\(song\.duration / 60\)\}\:</span>{(
                                                   song.duration % 60
                                               )
                                                   .toString()
                                                   .padStart(2, "0")}`
                                             : ""}
                                     </div>
+                                    <button
+                                        onClick={() => openAddToPlaylistModal(song)} // Mở modal thêm vào playlist
+                                        className="text-blue-500 hover:text-blue-400 focus:outline-none"
+                                        aria-label={`Add ${song.title} to another playlist`}
+                                    >
+                                        <FaPlus size={16} />
+                                    </button>
                                     <button
                                         onClick={() => openModal(song._id, song.title)}
                                         className="text-red-500 hover:text-red-400 focus:outline-none"
@@ -350,12 +382,16 @@ const PlaylistSong = ({ playlist, onBack, onSongRemoved }) => {
                             <button
                                 className="bg-red-500 hover:bg-red-400 text-white rounded-md py-2 px-4 focus:outline-none"
                                 onClick={handleConfirmDeletePlaylist}
-                            >
-                                Delete
+                            >Delete
                             </button>
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Modal "Thêm vào playlist" */}
+            {isAddToPlaylistModalOpen && selectedSongToAdd && (
+                <Playlist song={selectedSongToAdd} onClose={closeAddToPlaylistModal} />
             )}
         </div>
     );

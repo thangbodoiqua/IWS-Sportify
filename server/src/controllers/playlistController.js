@@ -1,3 +1,5 @@
+//path: server/src/controllers/playlistController.js
+
 import PlaylistModel from "../models/playlistModel.js";
 import { SongModel } from "../models/songModel.js";
 
