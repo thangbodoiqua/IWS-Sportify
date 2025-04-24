@@ -1,12 +1,12 @@
 import { SongModel } from '../models/songModel.js';
-import  cloudinary  from '../config/cloudinary.js';
+import cloudinary from '../config/cloudinary.js';
+import AlbumModel from '../models/albumModel.js'; // Import AlbumModel
 
 const uploadToCloudinary = async (file) => {
     try {
         const result = await cloudinary.uploader.upload(file.tempFilePath, {
             resource_type: 'auto',
-        }); 
-
+        });
         return result.secure_url;
     } catch (error) {
         console.error('Error in uploadToCloudinary:', error);
@@ -29,19 +29,32 @@ export async function createSong(req, res, next) {
         const song = new SongModel({
             title,
             artist,
-            audioUrl,   
+            audioUrl,
             imageUrl,
             duration,
             albumId: albumId || null,
         });
-        
+
         await song.save();
 
-        if(albumId) {
-            await Album.findByIdAndUpdate(albumId, {
-                $push: { songs: song._id },
-            });
+        if (albumId) {
+            try {
+                const album = await AlbumModel.findByIdAndUpdate(
+                    albumId,
+                    { $push: { songs: song._id } },
+                    { new: true } // Để trả về album đã cập nhật (tùy chọn)
+                );
+
+                if (!album) {
+                    console.warn(`Album with ID ${albumId} not found when trying to add song.`);
+                    // Không trả về lỗi 404 ở đây, vì việc tạo bài hát vẫn thành công
+                }
+            } catch (error) {
+                console.error('Error adding song to album:', error);
+                // Ghi log lỗi, nhưng không làm gián đoạn việc tạo bài hát
+            }
         }
+
         res.status(201).json({
             success: true,
             message: "Song created",
