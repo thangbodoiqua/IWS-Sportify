@@ -12,7 +12,7 @@ import userRoute from './src/routes/userRoute.js';
 import songRoute from './src/routes/songRoute.js';
 import playlistRoute from './src/routes/playlistRoute.js';
 import albumRoute from './src/routes/albumRoute.js'; // Import albumRoute
-
+import adminRoutes from './src/routes/adminRoute.js'; // Import adminRoutes
 dotenv.config();
 connectDB();
 
@@ -38,6 +38,8 @@ app.use(cors({
 app.get('/', (req, res) => {
   res.send('cdb' + process.env.ADMIN_EMAIL);
 });
+app.use('/api/admin', adminRoutes);
+
 app.use('/api/user', userRoute)
 app.use('/api/auth', authRoute)
 app.use('/api/song', songRoute)

@@ -6,6 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import AuthCallBack from './pages/AuthCallBack';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import AdminDashboard from './pages/AdminDashBoard';
 
 const App = () => {
   return (
@@ -15,6 +16,7 @@ const App = () => {
         <Route path='/' element= {<Home/>}/>
         <Route path='/login' element={<Login />} />
         <Route path='/auth-callback' element={<AuthCallBack />} />
+        <Route path='/admin' element={<AdminDashboard />} />
       </Routes>
     </div>
   )

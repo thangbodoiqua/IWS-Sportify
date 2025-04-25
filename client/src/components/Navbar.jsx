@@ -3,27 +3,12 @@ import { assets } from "../assets/assets";
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 import { toast } from 'react-toastify';
-import { FiHome, FiSearch, FiPlus } from 'react-icons/fi';
-import AddSongForm from './AddSongForm'; // Import the modal
+import { FiHome, FiSearch, FiSettings } from 'react-icons/fi'; // Import FiSettings for admin icon
 import axiosInstance from '../AxiosInstance';
 
 const Navbar = ({ onHomeClick }) => { // Receive the onHomeClick prop
     const navigate = useNavigate();
     const { user, backendUrl, setUser, setIsLoggedIn } = useContext(AppContext).value;
-    const [isCreateSongModalOpen, setIsCreateSongModalOpen] = useState(false); // State for modal
-
-    const handleAddSongClick = () => {
-        if (user) {
-            setIsCreateSongModalOpen(true); // Open the modal
-        } else {
-            toast.error("Please log in to add a song.");
-        }
-    };
-
-    const handleSongCreated = () => {
-        setIsCreateSongModalOpen(false);
-        // You can add logic here to refresh the song list or do any other necessary action
-    }
 
     const logout = async () => {
         try {
@@ -34,6 +19,10 @@ const Navbar = ({ onHomeClick }) => { // Receive the onHomeClick prop
         } catch (error) {
             toast.error(error.message);
         }
+    };
+
+    const navigateToAdmin = () => {
+        navigate('/admin');
     };
 
     return (
@@ -55,9 +44,9 @@ const Navbar = ({ onHomeClick }) => { // Receive the onHomeClick prop
 
             <div className='flex items-center gap-3'>
                 {user.isAdmin && (
-                    <button onClick={handleAddSongClick} className='flex items-center gap-1 cursor-pointer hover:text-gray-500 transition-all text-sm'>
-                        <FiPlus className="text-lg" />
-                        <span className="hidden sm:inline">Add</span>
+                    <button onClick={navigateToAdmin} className='flex items-center gap-1 cursor-pointer hover:text-gray-500 transition-all text-sm'>
+                        <FiSettings className="text-lg" />
+                        <span className="hidden sm:inline">Admin</span>
                     </button>
                 )}
 
@@ -80,14 +69,6 @@ const Navbar = ({ onHomeClick }) => { // Receive the onHomeClick prop
                     </button>
                 )}
             </div>
-
-            {/* Render the modal */}
-            {isCreateSongModalOpen && (
-                <AddSongForm
-                    onCancel={() => setIsCreateSongModalOpen(false)}
-                    onSongCreated={handleSongCreated}
-                />
-            )}
         </div>
     );
 };

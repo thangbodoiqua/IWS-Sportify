@@ -114,6 +114,7 @@ export const AppContextProvider = (props) => {
       toast.info(`Playing "${song.title}".`);
     }
   };
+  
   const playNow = (song) => {
     setQueue([song]);
     setQueueIndex(0);

@@ -23,3 +23,17 @@ export const getUserData = async (req, res) => {
         return res.status(500).json({ message: "Server error" });
     }
 };
+
+export const getUsers = async (req, res) => {
+    try {
+        const totalUsers = await userModel.countDocuments();
+
+        res.json({
+            totalUsers,
+        });
+
+    } catch (err) {
+        console.error('[AdminController] Error getting dashboard stats:', err);
+        res.status(500).json({ error: 'Failed to load dashboard stats' });
+    }
+};

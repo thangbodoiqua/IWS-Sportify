@@ -71,7 +71,7 @@ export async function getAllSongs(req, res, next) {
         const songs = await SongModel.find().sort({ createdAt: -1 });
         res.status(200).json(songs);
     } catch (error) {
-        next(error);   
+        next(error);
     }
 }
 
@@ -80,7 +80,7 @@ export async function getFeaturedSongs(req, res, next) {
         //fetch 6 rand songs
         const songs = await SongModel.aggregate([
             {
-                $sample: {size: 6}
+                $sample: { size: 6 }
             },
             {
                 $project: {
@@ -102,10 +102,10 @@ export async function getFeaturedSongs(req, res, next) {
 
 export async function getMadeForYouSongs(req, res, next) {
     try {
-        //fetch 6 rand songs
+        //fetch 4 rand songs
         const songs = await SongModel.aggregate([
             {
-                $sample: {size: 4}
+                $sample: { size: 4 }
             },
             {
                 $project: {
@@ -125,12 +125,12 @@ export async function getMadeForYouSongs(req, res, next) {
     }
 }
 
-export  async function getTrendingSongs(req, res, next) {
+export async function getTrendingSongs(req, res, next) {
     try {
         //fetch 6 rand songs
         const songs = await SongModel.aggregate([
             {
-                $sample: {size: 6}
+                $sample: { size: 6 }
             },
             {
                 $project: {
@@ -149,3 +149,54 @@ export  async function getTrendingSongs(req, res, next) {
         next(error);
     }
 }
+
+export async function deleteSong(req, res, next) {
+    try {
+        console.log("deleteSong", req.params.songId);
+        const songId = req.params.songId;
+        const song = await SongModel.findById(songId);
+
+        if (!song) {
+            return res.status(404).json({ message: 'Song not found' });
+        }
+
+        // Xóa bài hát khỏi album (nếu có)
+        if (song.albumId) {
+            try {
+                await AlbumModel.findByIdAndUpdate(
+                    song.albumId,
+                    { $pull: { songs: songId } }
+                );
+            } catch (error) {
+                console.error('Error removing song from album:', error);
+                // Không làm gián đoạn việc xóa bài hát chính
+            }
+        }
+
+        // const audioPublicId = extractPublicId(song.audioUrl);
+        // const imagePublicId = extractPublicId(song.imageUrl);
+        // if (audioPublicId) {
+        //     await cloudinary.uploader.destroy(audioPublicId, { resource_type: 'video' });
+        // }
+        // if (imagePublicId) {
+        //     await cloudinary.uploader.destroy(imagePublicId);
+        // }
+
+        await SongModel.findByIdAndDelete(songId);
+
+        res.status(200).json({
+            success: true,
+            message: 'Song deleted successfully',
+        });
+    } catch (error) {
+        console.error('Error deleting song:', error);
+        next(error);
+    }
+}
+
+// function extractPublicId(url) {
+//     const parts = url.split('/');
+//     const filenameWithExtension = parts[parts.length - 1];
+//     const filename = filenameWithExtension.split('.')[0];
+//     return filename;
+// }
