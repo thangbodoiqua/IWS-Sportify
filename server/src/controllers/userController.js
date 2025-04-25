@@ -4,7 +4,7 @@ export const getUserData = async (req, res) => {
     try {
         const { userId } = req;
         const user = await userModel.findById(userId);    
-
+        const isAdmin = user.email === process.env.ADMIN_EMAIL; 
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
@@ -15,6 +15,7 @@ export const getUserData = async (req, res) => {
                 username: user.name,
                 email: user.email,
                 phone: user.phone,
+                isAdmin
             }
         })
     } catch (error) {

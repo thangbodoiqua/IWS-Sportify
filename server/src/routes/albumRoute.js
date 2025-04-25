@@ -14,19 +14,17 @@ import {
 
 const albumRoute = express.Router();
 
-albumRoute.use(adminAuth); // Chỉ admin mới có quyền quản lý album
-
 // Route để tạo album mới (có middleware xử lý file)
-albumRoute.post('/create-album', createAlbum);
+albumRoute.post('/create-album', adminAuth, createAlbum);
 
 // Route để xóa album theo ID
-albumRoute.delete('/:albumId', deleteAlbum);
+albumRoute.delete('/:albumId',adminAuth, deleteAlbum);
 
 // Route để thêm bài hát vào album
-albumRoute.post('/add-song', addSongToAlbum);
+albumRoute.post('/add-song', adminAuth, addSongToAlbum);
 
 // Route để xóa bài hát khỏi album
-albumRoute.post('/remove-song', removeSongFromAlbum);
+albumRoute.post('/remove-song', adminAuth, removeSongFromAlbum);
 
 // Route để lấy thông tin tất cả các album
 albumRoute.get('/', getAllAlbums);
@@ -35,6 +33,6 @@ albumRoute.get('/', getAllAlbums);
 albumRoute.get('/:albumId', getAlbumById);
 
 // Route để cập nhật thông tin của một album (có middleware xử lý file)
-albumRoute.put('/:albumId', updateAlbum);
+albumRoute.put('/:albumId', adminAuth, updateAlbum);
 
 export default albumRoute;

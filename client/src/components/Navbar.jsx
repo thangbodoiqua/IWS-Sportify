@@ -54,7 +54,7 @@ const Navbar = ({ onHomeClick }) => { // Receive the onHomeClick prop
             </div>
 
             <div className='flex items-center gap-3'>
-                {user && (
+                {user.isAdmin && (
                     <button onClick={handleAddSongClick} className='flex items-center gap-1 cursor-pointer hover:text-gray-500 transition-all text-sm'>
                         <FiPlus className="text-lg" />
                         <span className="hidden sm:inline">Add</span>

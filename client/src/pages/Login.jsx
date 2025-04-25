@@ -5,6 +5,7 @@ import { AppContext } from '../context/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useEffect } from 'react';
+import axiosInstance from '../AxiosInstance';
 const Login = () => {
   const navigate = useNavigate();
 
@@ -31,11 +32,9 @@ const Login = () => {
   const onSubmitHandler = async (e) => {
     try {
       e.preventDefault();
-      
-      axios.defaults.withCredentials = true;
-
+    
       if (state === 'Sign up') {
-        const { data } = await axios.post(backendUrl + '/api/auth/register', {
+        const { data } = await axiosInstance.post(backendUrl + '/api/auth/register', {
           name,
           email,
           password: password,
@@ -52,12 +51,12 @@ const Login = () => {
          }
       } else {
         
-        const { data } = await axios.post(backendUrl + '/api/auth/login', {
+        const { data } = await axiosInstance.post(backendUrl + '/api/auth/login', {
           email,
           password: password,
         })  
 
-
+        
         if (data.success) {
           setIsLoggedIn(true);
           getUserData();
@@ -108,12 +107,6 @@ const Login = () => {
             <input type="password" onChange = {e => {setPassword(e.target.value)}} value={password} placeholder="Password" className='bg-transparent outline-none' required />
           </div>
 
-          {/* {state === 'Sign up' && (
-            <div className='mb-4 flex items-center gap-3 w-full px-5 py-2.5 rounded-full bg-[#333A5C]'>
-            <img src={assets.lock_icon} alt="" />
-            <input type="password" onChange = {e => {setConfirmPassword(e.target.value)}} value={confirmPassword} placeholder="Confirm password" className='bg-transparent outline-none' required />
-          </div>
-          )} */}
           
           <p className='mb-4 text-indigo-400 cursor-pointer' onClick={() => { navigate('/reset-password'); clearForm();} }>forgot passowrd?</p>
 

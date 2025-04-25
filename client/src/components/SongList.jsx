@@ -1,13 +1,15 @@
 import React, { useContext, useEffect, useState, useRef } from 'react';
 import { AppContext } from '../context/AppContext';
-import { FaPlay, FaPlus } from 'react-icons/fa'; // Import FaPlus icon
+import { FaPlay, FaPlus, FaListUl, FaEllipsisV } from 'react-icons/fa'; // Import FaEllipsisV
+import { FiMoreVertical } from 'react-icons/fi'; // Một icon dấu ba chấm khác
 
 const SongList = ({ onOpenPlaylistModal }) => {
     const { value } = useContext(AppContext);
-    const { backendUrl, setCurrentSong } = value;
+    const { backendUrl, setCurrentSong, addToQueue } = value;
     const [songs, setSongs] = useState([]);
     const [loading, setLoading] = useState(true);
     const scrollRef = useRef(null);
+    const [optionsVisible, setOptionsVisible] = useState({}); // State để theo dõi hiển thị options cho từng bài hát
 
     useEffect(() => {
         const fetchSongs = async () => {
@@ -25,7 +27,7 @@ const SongList = ({ onOpenPlaylistModal }) => {
 
     const scroll = (direction) => {
         const container = scrollRef.current;
-        const scrollAmount = 160 + 16; // Kích thước item + gap
+        const scrollAmount = 160 + 16;
         if (container) {
             container.scrollBy({
                 left: direction === 'left' ? -scrollAmount : scrollAmount,
@@ -38,10 +40,28 @@ const SongList = ({ onOpenPlaylistModal }) => {
         setCurrentSong(song);
     };
 
+    const handleAddToQueue = (e, song) => {
+        e.stopPropagation();
+        if (addToQueue) {
+            addToQueue(song);
+            console.log(`Đã thêm ${song.title} vào queue`);
+        } else {
+            console.warn('Hàm addToQueue không được định nghĩa trong AppContext');
+        }
+    };
+
+    const toggleOptions = (e, songId) => {
+        e.stopPropagation(); // Ngăn chọn bài hát khi bấm vào dấu ba chấm
+        setOptionsVisible(prev => ({
+            ...prev,
+            [songId]: !prev[songId],
+        }));
+    };
+
     return loading ? (
-        <div className="flex items-center justify-center p-10 text-white">Loading songs...</div>
+        <div className="flex items-center justify-center p-3 text-white">Loading songs...</div>
     ) : (
-        <div className="relative p-6 h-[240px] w-full max-w-[calc(100vw - 48px)] md:w-[620px]"> {/* Tăng chiều rộng một chút để vừa nút cuộn */}
+        <div className="relative p-3 h-[240px] w-full max-w-[calc(100vw - 48px)] md:w-[850px]">
             <button
                 onClick={() => scroll('left')}
                 className="cursor-pointer absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-gray-800 text-white p-3 rounded-full shadow-md transition-all duration-200 hover:bg-gray-600 hover:scale-105"
@@ -55,12 +75,12 @@ const SongList = ({ onOpenPlaylistModal }) => {
             <div
                 ref={scrollRef}
                 className="flex gap-4 overflow-x-auto scroll-smooth no-scrollbar"
-                style={{ WebkitOverflowScrolling: 'touch' }} // Cho iOS cuộn mượt mà
+                style={{ WebkitOverflowScrolling: 'touch' }}
             >
                 {songs.map((song) => (
                     <div
                         key={song._id}
-                        className="cursor-pointer min-w-[160px] max-w-[160px] h-[200px] bg-gray-900 rounded-xl overflow-hidden shadow-lg flex-shrink-0 relative group transition-all duration-200 hover:shadow-xl"
+                        className="cursor-pointer min-w-[160px] max-w-[160px] h-[200px] bg-gray-900 rounded-xl overflow-hidden shadow-lg flex-shrink-0 relative group transition-all duration-200 hover:shadow-xl flex flex-col"
                         onClick={() => handleSongSelect(song)}
                     >
                         <div className="relative w-full h-[100px] overflow-hidden rounded-t-xl">
@@ -74,24 +94,43 @@ const SongList = ({ onOpenPlaylistModal }) => {
                                     <FaPlay className="text-black text-lg" />
                                 </div>
                             </div>
-                            {/* Add to Playlist Button */}
+                            {/* Nút dấu ba chấm */}
                             <button
-                                onClick={(e) => {
-                                    e.stopPropagation(); // Ngăn sự kiện click lan ra div cha (chọn bài hát)
-                                    if (onOpenPlaylistModal) {
-                                        onOpenPlaylistModal(song);
-                                    }
-                                }}
-                                className="absolute top-2 right-2 bg-gray-700 bg-opacity-70 rounded-full p-1 text-white hover:bg-gray-600 focus:outline-none"
-                                aria-label={`Add ${song.title} to playlist`}
+                                onClick={(e) => toggleOptions(e, song._id)}
+                                className="absolute top-2 right-2 bg-gray-700 bg-opacity-70 rounded-full p-1 text-white hover:bg-gray-600 focus:outline-none z-10"
+                                aria-label={`More options for ${song.title}`}
                             >
-                                <FaPlus className="w-4 h-4" />
+                                <FiMoreVertical className="w-4 h-4" />
                             </button>
                         </div>
-                        <div className="p-3 flex flex-col">
+                        <div className="p-3 flex flex-col flex-grow">
                             <h3 className="text-sm font-semibold text-white truncate">{song.title}</h3>
                             <p className="text-xs text-gray-400 truncate">{song.artist}</p>
                         </div>
+                        {/* Các options (ẩn hiện dựa trên state) */}
+                        {optionsVisible[song._id] && (
+                            <div className="flex flex-col items-center justify-around p-2 bg-gray-800 rounded-b-xl">
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (onOpenPlaylistModal) {
+                                            onOpenPlaylistModal(song);
+                                        }
+                                    }}
+                                    className="w-full py-2 text-sm text-white hover:bg-gray-700 rounded"
+                                    aria-label={`Add ${song.title} to playlist`}
+                                >
+                                    Add to Playlist
+                                </button>
+                                <button
+                                    onClick={(e) => handleAddToQueue(e, song)}
+                                    className="w-full py-2 text-sm text-white hover:bg-gray-700 rounded"
+                                    aria-label={`Add ${song.title} to queue`}
+                                >
+                                    Add to Queue
+                                </button>
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>
@@ -106,7 +145,6 @@ const SongList = ({ onOpenPlaylistModal }) => {
                 </svg>
             </button>
 
-            {/* Ẩn thanh cuộn ngang */}
             <style jsx>{`
                 .no-scrollbar::-webkit-scrollbar {
                     display: none;
