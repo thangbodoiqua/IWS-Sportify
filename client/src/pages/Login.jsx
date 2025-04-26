@@ -40,10 +40,8 @@ const Login = () => {
         })
         
         if (data.success) {
-          setIsLoggedIn(true);
-          getUserData();
           setState('Login');
-          // clearForm();
+          clearForm();
           toast.success(data.message)
          }else {
           toast.error(data.message)

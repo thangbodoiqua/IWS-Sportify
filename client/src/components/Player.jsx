@@ -1,66 +1,66 @@
 import React, { useRef, useState, useEffect, useContext } from "react";
 import {
-    Play,
-    Pause,
-    SkipForward,
-    SkipBack,
-    Repeat,
-    Volume2,
-    VolumeX,
-    Plus, // Import icon Plus
-    ListMusic, // Import icon for Queue
+  Play,
+  Pause,
+  SkipForward,
+  SkipBack,
+  Repeat,
+  Volume2,
+  VolumeX,
+  Plus, // Import icon Plus
+  ListMusic, // Import icon for Queue
 } from "lucide-react";
 import { AppContext } from "../context/AppContext"; // Import AppContext
 import AddToPlaylistForm from "./Playlist/AddToPlaylistForm"; // Import Playlist component
 import QueueSong from "../components/QueueSong"; // Import QueueSong component
 
 const Player = () => {
-    const audioRef = useRef(null);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [currentTime, setCurrentTime] = useState(0);
-    const [duration, setDuration] = useState(0);
-    const [isMuted, setIsMuted] = useState(false);
-    const [currentVolume, setCurrentVolume] = useState(1);
-    const [isRepeat, setIsRepeat] = useState(false);
-    const { value } = useContext(AppContext);
-    const { currentSong, nextSong, previousSong } = value; 
-    const [isAddToPlaylistModalOpen, setIsAddToPlaylistModalOpen] = useState(false);
-    const [isQueueVisible, setIsQueueVisible] = useState(false); 
+  const audioRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isMuted, setIsMuted] = useState(false);
+  const [currentVolume, setCurrentVolume] = useState(1);
+  const [isRepeat, setIsRepeat] = useState(false);
+  const { value } = useContext(AppContext);
+  const { currentSong, nextSong, previousSong } = value;
+  const [isAddToPlaylistModalOpen, setIsAddToPlaylistModalOpen] = useState(false);
+  const [isQueueVisible, setIsQueueVisible] = useState(false);
 
-    useEffect(() => {
-        if (!currentSong) return;
-        const audio = audioRef.current;
-        audio.pause();
-        audio.load();
-    
-        const onLoaded = () => {
-          setDuration(audio.duration);
-          if (isPlaying) { // Chỉ play nếu đang phát trước đó
-            audio.play().catch((err) => console.error("Autoplay failed:", err));
-          }
-        };
-    
-        const onTime = () => setCurrentTime(audio.currentTime);
-    
-        const onEnded = () => {
-          if (isRepeat) {
-            audioRef.current.currentTime = 0;
-            audioRef.current.play();
-          } else {
-            nextSong();
-          }
-        };
-    
-        audio.addEventListener("loadedmetadata", onLoaded);
-        audio.addEventListener("timeupdate", onTime);
-        audio.addEventListener("ended", onEnded);
-    
-        return () => {
-          audio.removeEventListener("loadedmetadata", onLoaded);
-          audio.removeEventListener("timeupdate", onTime);
-          audio.removeEventListener("ended", onEnded);
-        };
-      }, [currentSong, isRepeat, nextSong, isPlaying]); // Thêm isPlaying vào dependencies
+  useEffect(() => {
+    if (!currentSong) return;
+    const audio = audioRef.current;
+    audio.pause();
+    audio.load();
+
+    const onLoaded = () => {
+      setDuration(audio.duration);
+      if (isPlaying) {
+        audio.play().catch((err) => console.error("Autoplay failed:", err));
+      }
+    };
+
+    const onTime = () => setCurrentTime(audio.currentTime);
+
+    const onEnded = () => {
+      if (isRepeat) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play();
+      } else {
+        nextSong();
+      }
+    };
+
+    audio.addEventListener("loadedmetadata", onLoaded);
+    audio.addEventListener("timeupdate", onTime);
+    audio.addEventListener("ended", onEnded);
+
+    return () => {
+      audio.removeEventListener("loadedmetadata", onLoaded);
+      audio.removeEventListener("timeupdate", onTime);
+      audio.removeEventListener("ended", onEnded);
+    };
+  }, [currentSong, isRepeat, nextSong, isPlaying]); // Thêm isPlaying vào dependencies
 
   useEffect(() => {
     if (!currentSong || !audioRef.current) return;
@@ -116,33 +116,30 @@ const Player = () => {
     const s = Math.floor(secs % 60)
       .toString()
       .padStart(2, "0");
-    return `${m}:${s}`; 
+    return `${m}:${s}`;
   };
-  
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       const activeElement = document.activeElement;
 
-      
       const isTyping =
         activeElement.tagName === "INPUT" ||
         activeElement.tagName === "TEXTAREA" ||
         activeElement.isContentEditable;
 
-      
       if (!isTyping && e.key === " ") {
         e.preventDefault();
-        togglePlay(); 
+        togglePlay();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
 
-    // Cleanup: Loại bỏ event listener khi component unmount
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [togglePlay]); // Thêm togglePlay vào dependencies để đảm bảo nó luôn là phiên bản mới nhất
+  }, [togglePlay]);
 
   // Hàm mở modal "Thêm vào playlist"
   const openAddToPlaylistModal = () => {
@@ -161,32 +158,28 @@ const Player = () => {
 
   if (!currentSong) {
     return (
-        <div className="fixed bottom-0 left-0 w-full h-20 bg-[#000000] text-white flex items-center justify-center px-20 gap-4 z-50 shadow-md">
-            <p>No slected song.</p>
-        </div>
+      <div className="fixed bottom-0 left-0 w-full h-20 bg-black text-white flex items-center justify-center px-5 md:px-10 lg:px-20 gap-4 z-50 shadow-md">
+        <p>No selected song.</p>
+      </div>
     );
-}
+  }
 
   return (
-    <div className="fixed bottom-0 left-0 w-full h-20 bg-[#000000] text-white flex items-center justify-between px-20 gap-4 z-50 shadow-md">
-      <div className="flex items-center justify-between gap-4 w-full">
+    <div className="fixed bottom-0 left-0 w-full h-auto lg:h-30 bg-black text-white flex items-center justify-between px-5 md:px-10 lg:px-20 gap-4 z-50 shadow-md">
+      <div className="flex items-center justify-between gap-4 w-full flex-col sm:flex-row">
         <audio ref={audioRef}>
           <source src={currentSong.audioUrl} type="audio/mpeg" />
         </audio>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 md:flex-row flex-col mb-2 md:mb-0">
           <img
             src={currentSong.imageUrl}
             alt={currentSong.title}
-            className="w-16 h-16 rounded-md shadow"
+            className="w-12 h-12 rounded-md shadow sm:w-16 sm:h-16"
           />
-          <div className="flex flex-col">
-            <p className="truncate font-semibold text-lg">
-              {currentSong.title}
-            </p>
-            <p className="text-sm text-gray-400 truncate">
-              {currentSong.artist}
-            </p>
+          <div className="flex flex-col items-start">
+            <p className="truncate font-semibold text-lg sm:text-xl">{currentSong.title}</p>
+            <p className="text-sm text-gray-400 truncate sm:text-base">{currentSong.artist}</p>
           </div>
           {/* Button "Thêm vào playlist" */}
           <button
@@ -198,7 +191,7 @@ const Player = () => {
           </button>
         </div>
 
-        <div className="w-[60%] flex items-center">
+        <div className="flex items-center flex-col md:flex-row md:w-[60%] gap-y-2 md:gap-x-4">
           <div className="flex gap-4">
             <button
               onClick={previousSong}
@@ -226,8 +219,8 @@ const Player = () => {
             </button>
           </div>
 
-          <div className="flex flex-1 items-center gap-4 min-w-0">
-            <span>{formatTime(currentTime)}</span>{" "}
+          <div className="flex flex-1 items-center gap-2 sm:gap-4 min-w-0 mt-2 md:mt-0">
+            <span className="text-sm">{formatTime(currentTime)}</span>
             <input
               type="range"
               min={0}
@@ -236,11 +229,11 @@ const Player = () => {
               onChange={handleSeek}
               className="w-full h-1 rounded-full bg-gray-700 accent-green-500 cursor-pointer"
             />
-            <span>{formatTime(duration)}</span>{" "}
+            <span className="text-sm">{formatTime(duration)}</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 mt-2 md:mt-0">
           {/* Repeat Icon */}
           <button
             className={`cursor-pointer focus:outline-none transition-colors duration-150 ${
@@ -259,11 +252,7 @@ const Player = () => {
               className="text-gray-400 cursor-pointer hover:text-white focus:outline-none"
               onClick={() => clickSoundIcon()}
             >
-              {isMuted ? (
-                <VolumeX className="w-5 h-5" />
-              ) : (
-                <Volume2 className="w-5 h-5" />
-              )}
+              {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
             </button>
 
             <div className="absolute -top-28 left-1/2 -translate-x-1/2 w-6 h-28 group-hover:flex hidden items-center justify-center">

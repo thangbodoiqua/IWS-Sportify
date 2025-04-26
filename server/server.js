@@ -45,6 +45,7 @@ app.use('/api/auth', authRoute)
 app.use('/api/song', songRoute)
 app.use('/api/playlist', playlistRoute)
 app.use('/api/album', albumRoute) // Sử dụng albumRoute
+// app.use('/api/account', accountRouter)
 
 app.listen(port, () => {
   console.log(`Server is running on port http://localhost:${port}`);
