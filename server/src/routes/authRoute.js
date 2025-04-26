@@ -7,6 +7,6 @@ const authRoute = express.Router();
 authRoute.post('/register', register);
 authRoute.post('/login', login);
 authRoute.post('/logout', userAuth, logout);
-authRoute.get('/is-auth', userAuth, isAuthenticated)
+authRoute.get('/is-auth', isAuthenticated)
 
 export default authRoute;

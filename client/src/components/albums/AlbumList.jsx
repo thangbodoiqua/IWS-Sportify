@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { FaPlay } from 'react-icons/fa';
-import { AppContext } from '../context/AppContext';
+import { AppContext } from '../../context/AppContext';
 import { useNavigate } from 'react-router-dom';
-import axiosInstance from '../AxiosInstance';
-import { assets } from '../assets/resources/assets'; // Assuming you might need assets
+import axiosInstance from '../../AxiosInstance';
+import { assets } from '../../assets/resources/assets'; // Assuming you might need assets
 
 const AlbumList = ({ onAlbumSelect }) => {
     const { value } = useContext(AppContext);

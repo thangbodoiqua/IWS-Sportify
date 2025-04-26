@@ -11,7 +11,7 @@ import {
     ListMusic, // Import icon for Queue
 } from "lucide-react";
 import { AppContext } from "../context/AppContext"; // Import AppContext
-import Playlist from "./AddSongToPlaylist"; // Import Playlist component
+import AddToPlaylistForm from "./Playlist/AddToPlaylistForm"; // Import Playlist component
 import QueueSong from "../components/QueueSong"; // Import QueueSong component
 
 const Player = () => {
@@ -162,7 +162,7 @@ const Player = () => {
   if (!currentSong) {
     return (
         <div className="fixed bottom-0 left-0 w-full h-20 bg-[#000000] text-white flex items-center justify-center px-20 gap-4 z-50 shadow-md">
-            <p>Chưa có bài hát nào được chọn.</p>
+            <p>No slected song.</p>
         </div>
     );
 }
@@ -291,7 +291,7 @@ const Player = () => {
       </div>
       {/* Modal "Thêm vào playlist" */}
       {isAddToPlaylistModalOpen && currentSong && (
-        <Playlist song={currentSong} onClose={closeAddToPlaylistModal} />
+        <AddToPlaylistForm song={currentSong} onClose={closeAddToPlaylistModal} />
       )}
       {/* Queue Modal */}
       {isQueueVisible && <QueueSong onClose={toggleQueueVisibility} />}

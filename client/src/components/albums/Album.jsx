@@ -1,12 +1,9 @@
 import React, { useContext, useState, useRef, useEffect } from 'react';
-import { AppContext } from '../context/AppContext';
-import { FaPlay, FaTrash, FaPlus } from 'react-icons/fa'; // Import FaPlus
+import { AppContext } from '../../context/AppContext';
+import { FaPlay, FaPlus } from 'react-icons/fa'; // Import FaPlus
 import { IoArrowBackOutline } from 'react-icons/io5';
-import { HiOutlineDotsHorizontal } from 'react-icons/hi';
-import { assets } from '../assets/resources/assets';
-import { toast } from 'react-toastify';
-import axiosInstance from '../AxiosInstance';
-import Playlist from './AddSongToPlaylist'; // Import Playlist component
+import { assets } from '../../assets/resources/assets';
+import AddToPlaylistForm from '../Playlist/AddToPlaylistForm'; // Import Playlist component
 
 const Album = ({ album, onBack }) => {
   const { setCurrentSong, playPlaylist } = useContext(AppContext).value;
@@ -180,7 +177,7 @@ const Album = ({ album, onBack }) => {
 
       {/* Modal "Thêm vào playlist" */}
       {isAddToPlaylistModalOpen && (
-        <Playlist songToAdd={selectedSongToAdd} onClose={closeAddToPlaylistModal} />
+        <AddToPlaylistForm songToAdd={selectedSongToAdd} onClose={closeAddToPlaylistModal} />
       )}
     </div>
   );

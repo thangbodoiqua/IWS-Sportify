@@ -1,28 +1,28 @@
 import React, { useContext, useEffect, useState, useRef } from 'react';
-import { AppContext } from '../context/AppContext';
-import { FaPlay, FaPlus, FaListUl, FaEllipsisV } from 'react-icons/fa'; // Import FaEllipsisV
-import { FiMoreVertical } from 'react-icons/fi'; // Một icon dấu ba chấm khác
+import { AppContext } from '../../context/AppContext';
+import { FaPlay, FaPlus, FaListUl, FaEllipsisV } from 'react-icons/fa';
+import { FiMoreVertical } from 'react-icons/fi';
 
-const SongList = ({ onOpenPlaylistModal }) => {
+const FeaturedSongs = ({ onOpenPlaylistModal }) => {
     const { value } = useContext(AppContext);
     const { backendUrl, setCurrentSong, addToQueue } = value;
     const [songs, setSongs] = useState([]);
     const [loading, setLoading] = useState(true);
     const scrollRef = useRef(null);
-    const [optionsVisible, setOptionsVisible] = useState({}); // State để theo dõi hiển thị options cho từng bài hát
+    const [optionsVisible, setOptionsVisible] = useState({});
 
     useEffect(() => {
-        const fetchSongs = async () => {
+        const fetchFeaturedSongs = async () => {
             try {
-                const res = await (await fetch(`${backendUrl}/api/song/`)).json();
+                const res = await (await fetch(`${backendUrl}/api/song/featured`)).json();
                 setSongs(res);
             } catch (err) {
-                console.error('Failed to fetch songs:', err);
+                console.error('Failed to fetch featured songs:', err);
             } finally {
                 setLoading(false);
             }
         };
-        fetchSongs();
+        fetchFeaturedSongs();
     }, [backendUrl]);
 
     const scroll = (direction) => {
@@ -51,7 +51,7 @@ const SongList = ({ onOpenPlaylistModal }) => {
     };
 
     const toggleOptions = (e, songId) => {
-        e.stopPropagation(); // Ngăn chọn bài hát khi bấm vào dấu ba chấm
+        e.stopPropagation();
         setOptionsVisible(prev => ({
             ...prev,
             [songId]: !prev[songId],
@@ -59,9 +59,10 @@ const SongList = ({ onOpenPlaylistModal }) => {
     };
 
     return loading ? (
-        <div className="flex items-center justify-center p-3 text-white">Loading songs...</div>
+        <div className="flex items-center justify-center p-3 text-white">Loading featured songs...</div>
     ) : (
         <div className="relative p-3 h-[240px] w-full max-w-[calc(100vw - 48px)] md:w-[850px]">
+            <h2 className="text-xl font-semibold text-white mb-2">Featured Songs</h2>
             <button
                 onClick={() => scroll('left')}
                 className="cursor-pointer absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-gray-800 text-white p-3 rounded-full shadow-md transition-all duration-200 hover:bg-gray-600 hover:scale-105"
@@ -129,6 +130,7 @@ const SongList = ({ onOpenPlaylistModal }) => {
                                 >
                                     Add to Queue
                                 </button>
+                                {/* Bạn có thể thêm các tùy chọn khác ở đây */}
                             </div>
                         )}
                     </div>
@@ -158,4 +160,4 @@ const SongList = ({ onOpenPlaylistModal }) => {
     );
 };
 
-export default SongList;
+export default FeaturedSongs;

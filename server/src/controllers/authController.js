@@ -109,10 +109,23 @@ export const logout = async (req, res) => {
 }
 
 export const isAuthenticated = async (req, res) => {
-    try {
-        res.status(200).json({success: true});
-    } catch (error) {
-        res.status(500).json({success: false, message: "unauthenticated" + error.message})
-    }
+    const { token } = req.cookies;
+    
+        if (!token) {
+            return res.status(200).json({success: false, message: "Unauthenticated"});
+        }
+    
+        try {
+            const tokenDecode = jwt.verify(token, process.env.JWT_SECRET);
+            if (tokenDecode.id) {
+                req.userId = tokenDecode.id;
+            } else {
+                return res.status(200).json({success: false, message: "Unauthenticated"});
+            }
+            return res.status(200).json({success: true, message: "Authenticated"});
+        } catch (error) {
+            console.error("Error in userAuth:", error);
+            return res.status(500).json({ message: "Error in userAuth" });   
+        }
 
 }

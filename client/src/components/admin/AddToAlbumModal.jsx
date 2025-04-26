@@ -30,13 +30,11 @@ const AddToAlbumModal = ({ song, albums, onClose, onAddToAlbumConfirmed }) => {
     const handleAddToAlbum = async () => {
         if (song && selectedAlbums.length > 0 && onAddToAlbumConfirmed) {
             try {
-                console.log("Song ID:", song._id);
-                console.log("Selected Album IDs:", selectedAlbums);
     
                 // Gửi request cho từng album được chọn
                 await Promise.all(
                     selectedAlbums.map(async (albumId) => {
-                        const response = await axiosInstance.post(`/api/album/add-song`, { songId: song._id, albumId });
+                        await axiosInstance.post(`/api/album/add-song`, { songId: song._id, albumId });
                     })
                 );
     
@@ -46,14 +44,13 @@ const AddToAlbumModal = ({ song, albums, onClose, onAddToAlbumConfirmed }) => {
             } catch (error) {
                 console.error('Error adding song to albums:', error);
                 toast.error('Error adding song to albums');
-                // Xử lý lỗi chi tiết hơn nếu cần
                 if (error.response) {
                     console.error('Error Response Data:', error.response.data);
                     console.error('Error Response Status:', error.response.status);
                 }
             }
         } else {
-            onClose(); // Đóng modal nếu không có album nào được chọn
+            onClose(); 
         }
     };
 

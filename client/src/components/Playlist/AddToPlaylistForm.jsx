@@ -1,8 +1,8 @@
 import React, { useContext } from 'react';
-import { AppContext } from '../context/AppContext';
+import { AppContext } from '../../context/AppContext';
 import { X } from 'lucide-react';
 
-const Playlist = ({ song, onClose: onClosePlaylist }) => { // Đổi tên prop onClose
+const AddToPlaylistForm = ({ song, onClose: onClosePlaylist }) => { // Đổi tên prop onClose
     const { value } = useContext(AppContext);
     const { filterPlaylistsContainingSong, addSongToPlaylist } = value;
 
@@ -45,4 +45,4 @@ const Playlist = ({ song, onClose: onClosePlaylist }) => { // Đổi tên prop o
     );
 };
 
-export default Playlist;
+export default AddToPlaylistForm;

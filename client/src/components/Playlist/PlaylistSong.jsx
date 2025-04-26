@@ -1,13 +1,13 @@
 import React, { useContext, useState, useRef, useEffect } from "react";
-import { AppContext } from "../context/AppContext";
+import { AppContext } from "../../context/AppContext";
 import { FaPlay, FaTrash, FaPlus } from "react-icons/fa"; // Import FaPlus
 import { IoArrowBackOutline } from "react-icons/io5";
 import { HiOutlineDotsHorizontal } from "react-icons/hi";
-import { assets } from "../assets/resources/assets";
+import { assets } from "../../assets/resources/assets";
 import { toast } from "react-toastify";
-import axiosInstance from "../AxiosInstance";
+import axiosInstance from "../../AxiosInstance";
 import { useNavigate } from 'react-router-dom';
-import Playlist from "./AddSongToPlaylist"; // Import Playlist component
+import Playlist from "./AddToPlaylistForm"; // Import Playlist component
 
 const PlaylistSong = ({ playlist, onBack, onSongRemoved }) => {
   const { setCurrentSong, backendUrl, fetchPlaylists, playPlaylist } = useContext(AppContext).value; // Lấy hàm playPlaylist

@@ -1,12 +1,12 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { assets } from "../assets/assets";
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 import { toast } from 'react-toastify';
-import { FiHome, FiSearch, FiSettings } from 'react-icons/fi'; // Import FiSettings for admin icon
+import { FiHome, FiSearch, FiSettings } from 'react-icons/fi'; 
 import axiosInstance from '../AxiosInstance';
 
-const Navbar = ({ onHomeClick }) => { // Receive the onHomeClick prop
+const Navbar = ({ onHomeClick }) => { 
     const navigate = useNavigate();
     const { user, backendUrl, setUser, setIsLoggedIn } = useContext(AppContext).value;
 
@@ -21,16 +21,13 @@ const Navbar = ({ onHomeClick }) => { // Receive the onHomeClick prop
         }
     };
 
-    const navigateToAdmin = () => {
-        navigate('/admin');
-    };
 
     return (
         <div className='w-full flex justify-between items-center py-2 px-4 sm:px-6 bg-gray-900 text-white sticky top-0 z-50'>
             <div className='flex items-center gap-2'>
                 <FiHome
                     className='text-xl hover:text-gray-500 cursor-pointer'
-                    onClick={onHomeClick} // Call the passed function on click
+                    onClick={onHomeClick}
                 />
                 <div className="relative">
                     <FiSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500" />
@@ -44,7 +41,7 @@ const Navbar = ({ onHomeClick }) => { // Receive the onHomeClick prop
 
             <div className='flex items-center gap-3'>
                 {user.isAdmin && (
-                    <button onClick={navigateToAdmin} className='flex items-center gap-1 cursor-pointer hover:text-gray-500 transition-all text-sm'>
+                    <button onClick={() => navigate('/admin')} className='flex items-center gap-1 cursor-pointer hover:text-gray-500 transition-all text-sm'>
                         <FiSettings className="text-lg" />
                         <span className="hidden sm:inline">Admin</span>
                     </button>

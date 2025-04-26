@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { toast } from 'react-toastify';
-import { AppContext } from '../context/AppContext';
-import axiosInstance from '../AxiosInstance';
+import { AppContext } from '../../context/AppContext';
+import axiosInstance from '../../AxiosInstance';
 import { XCircle } from 'lucide-react'; // Import icon
 
 const PlaylistForm = ({ onCancel, onPlaylistCreated }) => {

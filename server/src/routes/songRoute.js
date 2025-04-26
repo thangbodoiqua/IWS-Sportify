@@ -8,6 +8,6 @@ songRoute.get('/', getAllSongs);
 songRoute.get('/featured', getFeaturedSongs);
 songRoute.get('/made-for-you', getMadeForYouSongs);
 songRoute.get('/trending', getTrendingSongs);
-songRoute.delete('/:songId', userAuth, adminAuth, deleteSong); // Thêm route xóa bài hát
+songRoute.delete('/:songId', userAuth, adminAuth, deleteSong); 
 
 export default songRoute;

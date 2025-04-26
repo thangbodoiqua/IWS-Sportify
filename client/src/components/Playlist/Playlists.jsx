@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
-import { assets } from "../assets/resources/assets";
+import { assets } from "../../assets/resources/assets";
 import { toast } from 'react-toastify';
-import { AppContext } from '../context/AppContext';
-import PlaylistForm from './PlaylistForm';
+import { AppContext } from '../../context/AppContext';
+import PlaylistForm from './CreatePlaylistForm';
 
-const SideBar = ({ onPlaylistSelect }) => {
+const Playlists = ({ onPlaylistSelect }) => {
     const [isCreatingPlaylist, setIsCreatingPlaylist] = useState(false);
     const { isLoggedIn, playlists, fetchPlaylists } = useContext(AppContext).value;
     const playlistListRef = useRef(null);
@@ -104,4 +104,4 @@ const SideBar = ({ onPlaylistSelect }) => {
     );
 };
 
-export default SideBar;
+export default Playlists;
