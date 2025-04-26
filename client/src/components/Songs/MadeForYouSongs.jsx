@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useState, useRef } from 'react';
 import { AppContext } from '../../context/AppContext';
-import { FaPlay, FaPlus, FaListUl, FaEllipsisV } from 'react-icons/fa';
+import { FaPlay } from 'react-icons/fa';
 import { FiMoreVertical } from 'react-icons/fi';
+import SongOptions from './SongOptions'; // Import component SongOptions
 
 const MadeForYouSongs = ({ onOpenPlaylistModal }) => {
     const { value } = useContext(AppContext);
@@ -9,7 +10,7 @@ const MadeForYouSongs = ({ onOpenPlaylistModal }) => {
     const [songs, setSongs] = useState([]);
     const [loading, setLoading] = useState(true);
     const scrollRef = useRef(null);
-    const [optionsVisible, setOptionsVisible] = useState({});
+    const [optionsVisible, setOptionsVisible] = useState(null); // Chỉ lưu ID bài hát có options đang hiển thị
 
     useEffect(() => {
         const fetchMadeForYouSongs = async () => {
@@ -40,8 +41,7 @@ const MadeForYouSongs = ({ onOpenPlaylistModal }) => {
         setCurrentSong(song);
     };
 
-    const handleAddToQueue = (e, song) => {
-        e.stopPropagation();
+    const handleAddToQueue = (song) => {
         if (addToQueue) {
             addToQueue(song);
             console.log(`Đã thêm ${song.title} vào queue`);
@@ -52,10 +52,11 @@ const MadeForYouSongs = ({ onOpenPlaylistModal }) => {
 
     const toggleOptions = (e, songId) => {
         e.stopPropagation();
-        setOptionsVisible(prev => ({
-            ...prev,
-            [songId]: !prev[songId],
-        }));
+        setOptionsVisible(optionsVisible === songId ? null : songId); // Đóng nếu đang mở, mở nếu đang đóng
+    };
+
+    const closeOptions = () => {
+        setOptionsVisible(null);
     };
 
     return loading ? (
@@ -84,7 +85,7 @@ const MadeForYouSongs = ({ onOpenPlaylistModal }) => {
                         className="cursor-pointer min-w-[160px] max-w-[160px] h-[200px] bg-gray-900 rounded-xl overflow-hidden shadow-lg flex-shrink-0 relative group transition-all duration-200 hover:shadow-xl flex flex-col"
                         onClick={() => handleSongSelect(song)}
                     >
-                        <div className="relative w-full h-[100px] overflow-hidden rounded-t-xl">
+                        <div className="relative w-full h-[115px] overflow-hidden rounded-t-xl">
                             <img
                                 src={song.imageUrl}
                                 alt={song.title}
@@ -95,44 +96,29 @@ const MadeForYouSongs = ({ onOpenPlaylistModal }) => {
                                     <FaPlay className="text-black text-lg" />
                                 </div>
                             </div>
-                            {/* Nút dấu ba chấm */}
-                            <button
-                                onClick={(e) => toggleOptions(e, song._id)}
-                                className="absolute top-2 right-2 bg-gray-700 bg-opacity-70 rounded-full p-1 text-white hover:bg-gray-600 focus:outline-none z-10"
-                                aria-label={`More options for ${song.title}`}
-                            >
-                                <FiMoreVertical className="w-4 h-4" />
-                            </button>
+                            {/* Nút dấu ba chấm và SongOptions */}
+                            <div className=" absolute top-2 right-2 z-10">
+                                <button
+                                    onClick={(e) => toggleOptions(e, song._id)}
+                                    className="cursor-pointer bg-gray-700 bg-opacity-70 rounded-full p-1 text-white hover:bg-gray-600 focus:outline-none"
+                                    aria-label={`More options for ${song.title}`}
+                                >
+                                    <FiMoreVertical className="w-4 h-4" />
+                                </button>
+                                {optionsVisible === song._id && (
+                                    <SongOptions
+                                        song={song}
+                                        onClose={closeOptions}
+                                        onAddToQueue={handleAddToQueue}
+                                        onOpenPlaylistModal={onOpenPlaylistModal}
+                                    />
+                                )}
+                            </div>
                         </div>
                         <div className="p-3 flex flex-col flex-grow">
                             <h3 className="text-sm font-semibold text-white truncate">{song.title}</h3>
                             <p className="text-xs text-gray-400 truncate">{song.artist}</p>
                         </div>
-                        {/* Các options (ẩn hiện dựa trên state) */}
-                        {optionsVisible[song._id] && (
-                            <div className="flex flex-col items-center justify-around p-2 bg-gray-800 rounded-b-xl">
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (onOpenPlaylistModal) {
-                                            onOpenPlaylistModal(song);
-                                        }
-                                    }}
-                                    className="w-full py-2 text-sm text-white hover:bg-gray-700 rounded"
-                                    aria-label={`Add ${song.title} to playlist`}
-                                >
-                                    Add to Playlist
-                                </button>
-                                <button
-                                    onClick={(e) => handleAddToQueue(e, song)}
-                                    className="w-full py-2 text-sm text-white hover:bg-gray-700 rounded"
-                                    aria-label={`Add ${song.title} to queue`}
-                                >
-                                    Add to Queue
-                                </button>
-                                {/* Bạn có thể thêm các tùy chọn khác ở đây */}
-                            </div>
-                        )}
                     </div>
                 ))}
             </div>
