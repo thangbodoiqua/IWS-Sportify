@@ -5,3 +5,32 @@
 *{
     font-family: "Outfit", sans-serif;
 }
+
+/* Style for the whole scrollbar */
+/* Targets elements that have overflow and thus scrollbars */
+::-webkit-scrollbar {
+    width: 8px; /* Adjust width as needed */
+  }
+  
+  /* Style for the scrollbar track (the area behind the thumb) */
+  ::-webkit-scrollbar-track {
+    background: #1a1a1a; /* Darker background, similar to your component background */
+  }
+  
+  /* Style for the scrollbar thumb (the draggable handle) */
+  ::-webkit-scrollbar-thumb {
+    background: #555; /* A slightly lighter dark color for visibility */
+    border-radius: 4px; /* Optional: rounded corners for the thumb */
+  }
+  
+  /* Style for the scrollbar thumb on hover (optional) */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #888; /* Make it a bit lighter on hover */
+  }
+  
+  /* For Firefox (less customizable than webkit) */
+  /* You can make it "thin" and set the color of the thumb and track */
+  * {
+    scrollbar-width: thin; /* "auto" or "thin" */
+    scrollbar-color: #555 #1a1a1a; /* thumb color track color */
+  }

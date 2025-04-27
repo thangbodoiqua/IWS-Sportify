@@ -15,7 +15,7 @@ const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState('Songs');
     const [songs, setSongs] = useState([]);
     const [albums, setAlbums] = useState([]);
-    const [users, setUsers] = useState(0);
+    const [users, setUsers] = useState(0); // State này hiện không dùng trong DashboardCard, nhưng vẫn giữ lại
     const navigate = useNavigate();
     const [isAddAlbumModalOpen, setIsAddAlbumModalOpen] = useState(false);
     const [isAddSongModalOpen, setIsAddSongModalOpen] = useState(false);
@@ -24,45 +24,61 @@ const AdminDashboard = () => {
 
     const fetchDashboardData = async () => {
         try {
-            const [songsResponse, albumsResponse, usersRespon] = await Promise.all([
-                axiosInstance.get('/api/song'),
-                axiosInstance.get('/api/album'),
-                axiosInstance.get('/api/user') // Vẫn giữ lại để lấy artists và users
+            // Fetch songs và albums cùng lúc
+            const [songsResponse, albumsResponse] = await Promise.all([
+                 axiosInstance.get('/api/song'), // API lấy danh sách bài hát
+                 axiosInstance.get('/api/album'), // API lấy danh sách album
+                // Nếu cần totalUsers, bạn vẫn gọi API user ở đây
+                // axiosInstance.get('/api/user')
             ]);
-            console.log("data fetched: " + songsResponse, albumsResponse, usersRespon)
             const songsData = songsResponse.data;
+            // Giả định API /api/album trả về object { success: true, albums: [...] }
             const albumsData = albumsResponse.data.albums;
-            const usersData = usersRespon.data;     
-            console.log("data fetched: " + songsData, albumsData, usersData)
+             // Nếu có gọi API user: const usersData = usersRespon.data;
+
+            // Kiểm tra xem dữ liệu trả về có phải mảng không trước khi set state
             setSongs(Array.isArray(songsData) ? songsData : []);
             setAlbums(Array.isArray(albumsData) ? albumsData : []);
-            setUsers(usersData.totalUsers || 0);
-    
+            // Nếu có user data: setUsers(usersData.totalUsers || 0);
+
         } catch (error) {
             console.error('API Error (dashboard):', error);
-            // Xử lý lỗi, có thể hiển thị thông báo cho người dùng
+            // Xử lý lỗi: có thể hiển thị thông báo hoặc set state rỗng
+             setSongs([]);
+             setAlbums([]);
+             setUsers(0); // Reset user count on error
         }
     };
 
+    // Fetch dữ liệu khi component mount
     useEffect(() => {
         fetchDashboardData();
-    }, []);
+    }, []); // Empty dependency array: run only once on mount
 
     const handleBackToSongList = () => {
-        navigate('/');
+        navigate('/'); // Sử dụng navigate để quay về trang chủ
     };
 
+    // Các hàm xử lý sau khi xóa, thêm, cập nhật
     const handleSongDeleted = (deletedSongId) => {
+        // Cập nhật state songs sau khi xóa thành công một bài hát
         setSongs(prevSongs => prevSongs.filter(song => song._id !== deletedSongId));
+        // Không cần fetch lại toàn bộ data nếu chỉ muốn cập nhật state Songs
+        // Tuy nhiên, nếu việc xóa bài hát ảnh hưởng đến Album (bài đó có trong album nào đó),
+        // bạn có thể cần fetch lại Albums hoặc cập nhật state Albums một cách thông minh hơn.
     };
 
     const handleAlbumDeleted = (deletedAlbumId) => {
+        // Cập nhật state albums sau khi xóa thành công một album
         setAlbums(prevAlbums => prevAlbums.filter(album => album._id !== deletedAlbumId));
+         // Nếu việc xóa album ảnh hưởng đến state Songs (ví dụ: bài hát bị xóa theo album),
+         // bạn có thể cần fetch lại Songs hoặc cập nhật state Songs.
     };
 
     const handleAlbumCreated = () => {
+        // Đóng modal và fetch lại toàn bộ data để cập nhật danh sách album
         setIsAddAlbumModalOpen(false);
-        fetchDashboardData();
+        fetchDashboardData(); // Fetch lại cả songs và albums để đảm bảo đồng bộ
     };
 
     const handleOpenAddAlbumModal = () => {
@@ -74,8 +90,9 @@ const AdminDashboard = () => {
     };
 
     const handleSongCreated = () => {
+        // Đóng modal và fetch lại toàn bộ data để cập nhật danh sách bài hát
         setIsAddSongModalOpen(false);
-        fetchDashboardData();
+        fetchDashboardData(); // Fetch lại cả songs và albums
     };
 
     const handleOpenAddSongModal = () => {
@@ -97,15 +114,19 @@ const AdminDashboard = () => {
     };
 
     const handleAddToAlbumConfirmed = () => {
+        // Đóng modal sau khi thêm bài hát vào album thành công
         setIsAddToAlbumModalOpen(false);
-        // Có thể gọi lại fetchDashboardData nếu bạn muốn cập nhật thông tin album hiển thị ngay lập tức
+        // Gọi lại fetchDashboardData để cập nhật thông tin album hiển thị ngay lập tức
+        // (vì việc thêm bài hát có thể làm thay đổi thông tin trong AlbumTable, ví dụ: số lượng bài)
         fetchDashboardData();
     };
 
-    const handleAlbumUpdated = (updatedAlbumId) => {
-        // Gọi lại fetchDashboardData để cập nhật danh sách album
+     // Hàm này được gọi từ AlbumTable khi có album được cập nhật (ví dụ: xóa bài hát khỏi album)
+    const handleAlbumUpdated = () => {
+        // Fetch lại toàn bộ data để cập nhật danh sách album (và có thể cả songs nếu cần)
         fetchDashboardData();
     };
+
 
     return (
         <>
@@ -115,29 +136,37 @@ const AdminDashboard = () => {
                 <p className="text-gray-400 mb-6">Manage your music catalog</p>
 
                 {/* Thống kê tổng quan */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                {/* Đã căn giữa các card */}
+                <div className="flex w-ful justify-center mb-4 gap-4">
                     <DashboardCard icon={<span>🎵</span>} label="Total Songs" value={songs.length} />
                     <DashboardCard icon={<span>📁</span>} label="Total Albums" value={albums.length} />
-                    <DashboardCard icon={<span>👤</span>} label="Total Artists" value={0} />
-                    <DashboardCard icon={<span>👥</span>} label="Total Users" value={users} />
+                     {/* Nếu bạn fetch users count, hiển thị nó ở đây */}
+                    {/* <DashboardCard icon={<span>👥</span>} label="Total Users" value={users} /> */}
                 </div>
 
-                {/* Chuyển đổi tab */}
+                {/* Chuyển đổi tab - Cần thêm cursor-pointer bên trong component TabSwitcher */}
                 <TabSwitcher activeTab={activeTab} setActiveTab={setActiveTab} />
 
                 {/* Songs Tab */}
                 {activeTab === 'Songs' && (
                     <>
-                        <div className="flex justify-between items-center mb-4">
+                        <div className=" flex justify-between items-center mb-4">
                             <h2 className="text-lg font-semibold">Songs Library</h2>
                             <button
                                 onClick={handleOpenAddSongModal}
-                                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                // Đã thêm class cursor-pointer
+                                className="cursor-pointer bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                aria-label="Add new song" // Thêm aria-label cho accessibility
                             >
                                 <FiPlus className="inline-block mr-2" /> Add Song
                             </button>
                         </div>
-                        <SongTable songs={songs} onSongDeleted={handleSongDeleted} onAddToAlbum={handleOpenAddToAlbumModal} />
+                        {/* SongTable - Cần thêm cursor-pointer bên trong component SongTable cho các nút/dòng tương tác */}
+                        <SongTable
+                            songs={songs}
+                            onSongDeleted={handleSongDeleted}
+                            onAddToAlbum={handleOpenAddToAlbumModal} // Truyền hàm mở modal thêm vào album
+                        />
                     </>
                 )}
 
@@ -148,19 +177,27 @@ const AdminDashboard = () => {
                             <h2 className="text-lg font-semibold">Albums Library</h2>
                             <button
                                 onClick={handleOpenAddAlbumModal}
-                                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                // Đã thêm class cursor-pointer
+                                className="cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                aria-label="Add new album" // Thêm aria-label cho accessibility
                             >
                                 <FiPlus className="inline-block mr-2" /> Add Album
                             </button>
                         </div>
-                        <AlbumTable albums={albums} allSongs={songs} onAlbumDeleted={handleAlbumDeleted} onAlbumUpdated={handleAlbumUpdated} /> {/* Truyền allSongs và onAlbumUpdated */}
+                         {/* AlbumTable - Cần thêm cursor-pointer bên trong component AlbumTable cho các nút/dòng tương tác */}
+                        <AlbumTable
+                            albums={albums}
+                            allSongs={songs} // Truyền toàn bộ danh sách bài hát cho AlbumTable nếu cần hiển thị bài trong album
+                            onAlbumDeleted={handleAlbumDeleted}
+                            onAlbumUpdated={handleAlbumUpdated} // Truyền hàm xử lý khi album được cập nhật (ví dụ: xóa bài khỏi album)
+                        />
                     </>
                 )}
 
                 {/* Modal thêm album */}
                 {isAddAlbumModalOpen && (
                     <AddAlbumForm
-                        onCancel={handleCloseAddAlbumModal}
+                        onCancel={handleCloseAddAlbumModal} // Cần thêm cursor-pointer vào nút hủy/đóng bên trong AddAlbumForm
                         onAlbumCreated={handleAlbumCreated}
                     />
                 )}
@@ -168,8 +205,9 @@ const AdminDashboard = () => {
                 {/* Modal thêm bài hát */}
                 {isAddSongModalOpen && (
                     <AddSongForm
-                        onCancel={handleCloseAddSongModal}
+                        onCancel={handleCloseAddSongModal} // Cần thêm cursor-pointer vào nút hủy/đóng bên trong AddSongForm
                         onSongCreated={handleSongCreated}
+                        albums={albums} 
                     />
                 )}
 
@@ -177,9 +215,9 @@ const AdminDashboard = () => {
                 {isAddToAlbumModalOpen && currentSongForAlbum && (
                     <AddToAlbumModal
                         song={currentSongForAlbum}
-                        albums={albums}
-                        onClose={handleCloseAddToAlbumModal}
-                        onAddToAlbumConfirmed={handleAddToAlbumConfirmed}
+                        albums={albums} // Truyền danh sách album cho modal
+                        onClose={handleCloseAddToAlbumModal} // Cần thêm cursor-pointer vào nút đóng bên trong AddToAlbumModal
+                        onAddToAlbumConfirmed={handleAddToAlbumConfirmed} // Xử lý sau khi thêm thành công
                     />
                 )}
             </div>

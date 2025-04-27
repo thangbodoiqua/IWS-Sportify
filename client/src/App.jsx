@@ -12,17 +12,17 @@ import AdminDashboard from './pages/AdminDashBoard';
 
 const App = () => {
   return (
-    <div>
+    <div> 
       <ToastContainer />
       <Routes>
         <Route path='/' element= {<Home/>}/>
         <Route path='/login' element={<Login />} />
-        <Route path='/email-verify' element={<EmailVerify />} /> 
+        <Route path='/email-verify' element={<EmailVerify />} />
         <Route path='/reset-password' element={<ResetPassword />} />
         <Route path='/admin' element={<AdminDashboard />} />
         <Route path='/account' element={<AccountPage />} />
       </Routes>
-    </div>
+    </div> 
   )
 }
 

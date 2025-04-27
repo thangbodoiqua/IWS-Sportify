@@ -16,7 +16,7 @@ const SongTable = ({ songs, onSongDeleted, onAddToAlbum }) => { // Nhận callba
         if (songToDeleteId) {
             try {
                 await axiosInstance.delete(`/api/song/${songToDeleteId}`);
-                toast.success(`Song with ID ${songToDeleteId} deleted successfully`);
+                toast.success(`Deleted successfully`);
                 if (onSongDeleted) {
                     onSongDeleted(songToDeleteId);
                 }
@@ -59,7 +59,7 @@ const SongTable = ({ songs, onSongDeleted, onAddToAlbum }) => { // Nhận callba
                             <td>{song.artist}</td>
                             <td><button
                                     onClick={() => handleAddToAlbumClick(song)}
-                                    className="text-blue-500 hover:text-blue-400 focus:outline-none"
+                                    className="text-blue-500 cursor-pointer hover:text-blue-400 focus:outline-none"
                                     title="Add to Album"
                                 > Add to Album
                                 </button></td>
@@ -67,7 +67,7 @@ const SongTable = ({ songs, onSongDeleted, onAddToAlbum }) => { // Nhận callba
                                 
                                 <button
                                     onClick={() => handleDeleteClick(song._id)}
-                                    className="text-red-500 hover:text-red-400 focus:outline-none"
+                                    className="text-red-500 cursor-pointer hover:text-red-400 focus:outline-none"
                                     title="Delete Song"
                                 >
                                     <Trash2 className="h-5 w-5" />
@@ -85,10 +85,10 @@ const SongTable = ({ songs, onSongDeleted, onAddToAlbum }) => { // Nhận callba
                         <h5 className="text-lg font-semibold text-white mb-4">Confirm Delete</h5>
                         <p className="text-gray-400 mb-4">Are you sure you want to delete this song?</p>
                         <div className="flex justify-end gap-2">
-                            <button onClick={cancelDelete} className="bg-gray-600 hover:bg-gray-500 text-white py-2 px-4 rounded-md focus:outline-none">
+                            <button onClick={cancelDelete} className="cursor-pointer bg-gray-600 hover:bg-gray-500 text-white py-2 px-4 rounded-md focus:outline-none">
                                 Cancel
                             </button>
-                            <button onClick={confirmDelete} className="bg-red-600 hover:bg-red-500 text-white py-2 px-4 rounded-md focus:outline-none">
+                            <button onClick={confirmDelete} className="bg-red-600 cursor-pointer hover:bg-red-500 text-white py-2 px-4 rounded-md focus:outline-none">
                                 Delete
                             </button>
                         </div>

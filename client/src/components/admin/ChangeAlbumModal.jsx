@@ -46,7 +46,7 @@ const ChangeAlbumModal = ({ album, onClose, onSongsChanged }) => {
             <div className="bg-[#1f1f1f] rounded-xl p-6 w-full max-w-md shadow-2xl border border-gray-700 overflow-y-auto max-h-[90vh]">
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-2xl font-bold text-white">Remove Songs from "{album?.title}"</h2>
-                    <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
+                    <button onClick={onClose} className="cursor-pointer  text-gray-400 hover:text-white transition-colors">
                         <XCircle className="h-6 w-6" />
                     </button>
                 </div>
@@ -62,7 +62,7 @@ const ChangeAlbumModal = ({ album, onClose, onSongsChanged }) => {
                                         id={`remove-song-${song._id}`}
                                         value={song._id}
                                         onChange={() => handleRemoveCheckboxChange(song._id)}
-                                        className="mr-2 form-checkbox rounded border-gray-600 bg-gray-700 text-red-500 focus:ring-red-500"
+                                        className="cursor-pointer  mr-2 form-checkbox rounded border-gray-600 bg-gray-700 text-red-500 focus:ring-red-500"
                                     />
                                     <label htmlFor={`remove-song-${song._id}`} className="text-white">{song.title} - {song.artist}</label>
                                 </li>
@@ -74,12 +74,12 @@ const ChangeAlbumModal = ({ album, onClose, onSongsChanged }) => {
                 )}
 
                 <div className="flex justify-end gap-2">
-                    <button onClick={onClose} className="bg-gray-600 hover:bg-gray-500 text-white py-2 px-4 rounded-md focus:outline-none">
+                    <button onClick={onClose} className="cursor-pointer  bg-gray-600 hover:bg-gray-500 text-white py-2 px-4 rounded-md focus:outline-none">
                         Cancel
                     </button>
                     <button
                         onClick={handleRemoveSongsFromAlbum}
-                        className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md focus:outline-none"
+                        className="bg-red-600 cursor-pointer  hover:bg-red-700 text-white py-2 px-4 rounded-md focus:outline-none"
                         disabled={songsToRemove.length === 0}
                     >
                         Remove Songs

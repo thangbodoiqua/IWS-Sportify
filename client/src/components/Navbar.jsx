@@ -7,11 +7,11 @@ import { FiHome, FiSearch, FiSettings } from 'react-icons/fi';
 import axiosInstance from '../AxiosInstance';
 
 const Navbar = ({ onHomeClick }) => {
-    const navigate = useNavigate();
     const { user, backendUrl, setUser, setIsLoggedIn } = useContext(AppContext).value;
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
     const profileMenuRef = useRef(null);
     const avatarRef = useRef(null);
+    const navigate = useNavigate();
 
     const logout = async () => {
         try {

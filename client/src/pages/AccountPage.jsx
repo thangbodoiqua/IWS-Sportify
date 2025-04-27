@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useContext,useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../AxiosInstance";
 import { toast } from "react-toastify";
@@ -6,7 +6,7 @@ import "react-toastify/dist/ReactToastify.css"; // Import CSS for toast
 import Navbar from "../components/Navbar";
 import { FiEdit, FiLock } from "react-icons/fi"; // Import icon chỉnh sửa và khóa
 import { MdDelete } from "react-icons/md"; // Import icon xóa
-
+import { AppContext } from "../context/AppContext";
 function AccountPage() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -17,7 +17,7 @@ function AccountPage() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
-
+  const {isLoggedIn, setIsLoggedIn, logout} = useContext(AppContext).value;
   const navigate = useNavigate();
 
   const fetchAccountInfo = async () => {
@@ -25,7 +25,6 @@ function AccountPage() {
       const response = await axiosInstance.get("/api/user/data");
       if (response.status >= 200 && response.status < 300) {
         const accountData = response.data.userData;
-        console.log("Account data:", accountData);
         setUsername(accountData.username);
         setEmail(accountData.email);
         setFirstLetter(accountData.username.charAt(0).toUpperCase());
@@ -132,13 +131,7 @@ function AccountPage() {
     setShowDeleteConfirmation(false);
   };
 
-  const logout = async () => {
-    try {
-      await axiosInstance.post("/api/user/logout");
-    } catch (error) {
-      toast.error(error.message);
-    }
-  };
+  
 
   const handleConfirmDeleteAccount = async () => {
     try {
@@ -146,9 +139,7 @@ function AccountPage() {
       await logout();
       if (response.status >= 200 && response.status < 300) {
         toast.success("Account deleted successfully!");
-        setTimeout(() => {
           navigate("/");
-        }, 1500);
       } else {
         console.error(
           "Error deleting account:",

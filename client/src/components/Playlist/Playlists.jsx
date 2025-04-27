@@ -4,9 +4,9 @@ import { toast } from 'react-toastify';
 import { AppContext } from '../../context/AppContext';
 import PlaylistForm from './CreatePlaylistForm';
 
-const Playlists = ({ onPlaylistSelect }) => {
+const Playlists = ({ onPlaylistSelect, playlists, fetchPlaylists }) => {
     const [isCreatingPlaylist, setIsCreatingPlaylist] = useState(false);
-    const { isLoggedIn, playlists, fetchPlaylists } = useContext(AppContext).value;
+    const { isLoggedIn } = useContext(AppContext).value;
     const playlistListRef = useRef(null);
 
     useEffect(() => {

@@ -18,7 +18,7 @@ const Song = ({ song, onOpenPlaylistModal }) => {
             addToQueue(song);
             console.log(`Đã thêm ${song.title} vào queue`);
         } else {
-            console.warn('Hàm addToQueue không được định nghĩa trong AppContext');
+            console.warn('Eror in Add To Queue');
         }
     };
 

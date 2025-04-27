@@ -1,24 +1,35 @@
-import React, { useContext, useEffect, useState, useRef } from 'react';
+import React, { useContext, useEffect, useState, useRef, useCallback } from 'react'; // Thêm useCallback
 import { AppContext } from '../../context/AppContext';
 import { FaPlay } from 'react-icons/fa';
 import { FiMoreVertical } from 'react-icons/fi';
-import SongOptions from './SongOptions'; // Import component SongOptions
+import SongOptions from './SongOptions';
 
 const MadeForYouSongs = ({ onOpenPlaylistModal }) => {
     const { value } = useContext(AppContext);
-    const { backendUrl, setCurrentSong, addToQueue } = value;
+    const { backendUrl, setCurrentSong, addToQueue, setIsPlaying } = value;
     const [songs, setSongs] = useState([]);
     const [loading, setLoading] = useState(true);
     const scrollRef = useRef(null);
-    const [optionsVisible, setOptionsVisible] = useState(null); // Chỉ lưu ID bài hát có options đang hiển thị
+    const [optionsVisible, setOptionsVisible] = useState(null);
+    const [isHoveringContainer, setIsHoveringContainer] = useState(false);
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(false);
+    const [hoveredSongId, setHoveredSongId] = useState(null);
 
+    // Fetching Data
     useEffect(() => {
         const fetchMadeForYouSongs = async () => {
+            setLoading(true);
             try {
-                const res = await (await fetch(`${backendUrl}/api/song/made-for-you`)).json();
-                setSongs(res);
+                const res = await fetch(`${backendUrl}/api/song/made-for-you`);
+                 if (!res.ok) {
+                   throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                const data = await res.json();
+                setSongs(data || []);
             } catch (err) {
                 console.error('Failed to fetch "Made For You" songs:', err);
+                setSongs([]);
             } finally {
                 setLoading(false);
             }
@@ -26,121 +37,187 @@ const MadeForYouSongs = ({ onOpenPlaylistModal }) => {
         fetchMadeForYouSongs();
     }, [backendUrl]);
 
+    // Scrollability Check Logic
+    const checkScrollability = useCallback(() => {
+        const container = scrollRef.current;
+        if (container) {
+            const hasHorizontalScrollbar = container.scrollWidth > container.clientWidth;
+            const tolerance = 1;
+            setCanScrollLeft(container.scrollLeft > tolerance);
+            setCanScrollRight(container.scrollLeft < container.scrollWidth - container.clientWidth - tolerance);
+             if (!hasHorizontalScrollbar) {
+                 setCanScrollLeft(false);
+                 setCanScrollRight(false);
+            }
+        } else {
+            setCanScrollLeft(false);
+            setCanScrollRight(false);
+        }
+    }, []);
+
+    // Effect to handle scroll listeners and initial check
+    useEffect(() => {
+        const container = scrollRef.current;
+        if (container && !loading) {
+            container.addEventListener('scroll', checkScrollability, { passive: true });
+            const resizeObserver = new ResizeObserver(checkScrollability);
+            resizeObserver.observe(container);
+            const timerId = setTimeout(checkScrollability, 50);
+
+            return () => {
+                container.removeEventListener('scroll', checkScrollability);
+                resizeObserver.unobserve(container);
+                clearTimeout(timerId);
+            };
+        } else {
+             setCanScrollLeft(false);
+             setCanScrollRight(false);
+        }
+    }, [loading, checkScrollability, songs]); // Thêm songs để re-check nếu số lượng bài hát thay đổi
+
+    // Scroll Function
     const scroll = (direction) => {
         const container = scrollRef.current;
-        const scrollAmount = 160 + 16;
+        const scrollAmount = container ? (container.clientWidth / 2) : 300;
         if (container) {
             container.scrollBy({
                 left: direction === 'left' ? -scrollAmount : scrollAmount,
                 behavior: 'smooth',
             });
+            setTimeout(checkScrollability, 350);
         }
     };
 
+    // Handlers
     const handleSongSelect = (song) => {
         setCurrentSong(song);
+        setIsPlaying(true);
     };
 
     const handleAddToQueue = (song) => {
         if (addToQueue) {
             addToQueue(song);
-            console.log(`Đã thêm ${song.title} vào queue`);
         } else {
-            console.warn('Hàm addToQueue không được định nghĩa trong AppContext');
+            console.warn('addToQueue function is not available in AppContext');
         }
     };
 
     const toggleOptions = (e, songId) => {
         e.stopPropagation();
-        setOptionsVisible(optionsVisible === songId ? null : songId); // Đóng nếu đang mở, mở nếu đang đóng
+        setOptionsVisible(optionsVisible === songId ? null : songId);
     };
 
     const closeOptions = () => {
         setOptionsVisible(null);
     };
 
-    return loading ? (
-        <div className="flex items-center justify-center p-3 text-white">Loading "Made For You" songs...</div>
-    ) : (
-        <div className="relative p-3 h-[240px] w-full max-w-[calc(100vw - 48px)] md:w-[850px]">
-            <h2 className="text-xl font-semibold text-white mb-2">Made For You</h2>
-            <button
-                onClick={() => scroll('left')}
-                className="cursor-pointer absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-gray-800 text-white p-3 rounded-full shadow-md transition-all duration-200 hover:bg-gray-600 hover:scale-105"
-                aria-label="Scroll left"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                </svg>
-            </button>
+    const handleMouseEnterContainer = () => {
+        setIsHoveringContainer(true);
+        checkScrollability();
+    }
 
+    // JSX Rendering
+    return loading ? (
+        <div className="flex items-center justify-center p-3 text-white h-[240px]">Loading "Made For You" songs...</div>
+    ) : (
+        <div
+            className="relative p-3 h-[240px] w-full max-w-[calc(100vw - 48px)] md:max-w-[850px] mx-auto" // Giới hạn chiều rộng và căn giữa
+            onMouseEnter={handleMouseEnterContainer}
+            onMouseLeave={() => setIsHoveringContainer(false)}
+        >
+            <h2 className="text-xl font-semibold text-white mb-2">Made For You</h2>
+
+            {/* Scroll Left Button */}
+            {isHoveringContainer && canScrollLeft && (
+                 <button
+                    onClick={() => scroll('left')}
+                    className="cursor-pointer absolute left-[-8px] md:left-[-15px] top-[calc(50%_+_10px)] transform -translate-y-1/2 z-20 bg-gray-800 text-white p-2 md:p-3 rounded-full shadow-md transition-all duration-200 hover:bg-gray-600 hover:scale-105 opacity-80 hover:opacity-100"
+                    aria-label="Scroll left"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 md:w-5 md:h-5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                    </svg>
+                </button>
+            )}
+
+            {/* Song List Container */}
             <div
                 ref={scrollRef}
-                className="flex gap-4 overflow-x-auto scroll-smooth no-scrollbar"
+                className="flex gap-4 overflow-x-auto scroll-smooth no-scrollbar pb-2"
                 style={{ WebkitOverflowScrolling: 'touch' }}
             >
                 {songs.map((song) => (
                     <div
                         key={song._id}
-                        className="cursor-pointer min-w-[160px] max-w-[160px] h-[200px] bg-gray-900 rounded-xl overflow-hidden shadow-lg flex-shrink-0 relative group transition-all duration-200 hover:shadow-xl flex flex-col"
+                        className="cursor-pointer min-w-[160px] max-w-[160px] h-[200px] bg-[#181818] hover:bg-[#282828] rounded-lg overflow-hidden shadow-lg flex-shrink-0 relative group transition-colors duration-200 flex flex-col"
                         onClick={() => handleSongSelect(song)}
+                        onMouseEnter={() => setHoveredSongId(song._id)}
+                        onMouseLeave={() => setHoveredSongId(null)}
                     >
-                        <div className="relative w-full h-[115px] overflow-hidden rounded-t-xl">
-                            <img
+                        {/* Image and Play Button */}
+                        <div className="relative w-full h-[115px] overflow-hidden rounded-t-lg">
+                             <img
                                 src={song.imageUrl}
                                 alt={song.title}
-                                className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-110"
+                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                             />
-                            <div className="absolute inset-0 flex items-center justify-center bg-opacity-0 group-hover:bg-opacity-50 transition-opacity duration-200">
-                                <div className="bg-green-500 rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                    <FaPlay className="text-black text-lg" />
-                                </div>
-                            </div>
-                            {/* Nút dấu ba chấm và SongOptions */}
-                            <div className=" absolute top-2 right-2 z-10">
+                            <div className="absolute bottom-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-y-2 group-hover:translate-y-0">
                                 <button
-                                    onClick={(e) => toggleOptions(e, song._id)}
-                                    className="cursor-pointer bg-gray-700 bg-opacity-70 rounded-full p-1 text-white hover:bg-gray-600 focus:outline-none"
-                                    aria-label={`More options for ${song.title}`}
+                                    onClick={(e) => { e.stopPropagation(); handleSongSelect(song); }}
+                                    className="bg-green-500 hover:bg-green-400 rounded-full p-3 shadow-lg focus:outline-none"
+                                    aria-label={`Play ${song.title}`}
                                 >
-                                    <FiMoreVertical className="w-4 h-4" />
+                                    <FaPlay className="text-black text-sm" />
                                 </button>
-                                {optionsVisible === song._id && (
-                                    <SongOptions
-                                        song={song}
-                                        onClose={closeOptions}
-                                        onAddToQueue={handleAddToQueue}
-                                        onOpenPlaylistModal={onOpenPlaylistModal}
-                                    />
-                                )}
                             </div>
+                             {/* More Options Button & Menu */}
+                             {hoveredSongId === song._id && (
+                                <div className="absolute top-2 right-2 z-20">
+                                    <button
+                                        onClick={(e) => toggleOptions(e, song._id)}
+                                        className="cursor-pointer bg-black bg-opacity-60 hover:bg-opacity-80 rounded-full p-1 text-white focus:outline-none transition-opacity"
+                                        aria-label={`More options for ${song.title}`}
+                                    >
+                                        <FiMoreVertical className="w-4 h-4" />
+                                    </button>
+                                    {optionsVisible === song._id && (
+                                        <SongOptions
+                                            song={song}
+                                            onClose={closeOptions}
+                                            onAddToQueue={handleAddToQueue}
+                                            onOpenPlaylistModal={onOpenPlaylistModal}
+                                        />
+                                    )}
+                                </div>
+                            )}
                         </div>
-                        <div className="p-3 flex flex-col flex-grow">
-                            <h3 className="text-sm font-semibold text-white truncate">{song.title}</h3>
-                            <p className="text-xs text-gray-400 truncate">{song.artist}</p>
+                         {/* Song Info */}
+                        <div className="p-3 flex flex-col flex-grow overflow-hidden">
+                            <h3 className="text-sm font-semibold text-white truncate whitespace-nowrap">{song.title}</h3>
+                            <p className="text-xs text-gray-400 truncate whitespace-nowrap">{song.artist}</p>
                         </div>
                     </div>
                 ))}
+                 <div className="min-w-[1px] flex-shrink-0"></div> {/* Spacer */}
             </div>
 
-            <button
-                onClick={() => scroll('right')}
-                className="cursor-pointer absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-gray-800 text-white p-3 rounded-full shadow-md transition-all duration-200 hover:bg-gray-600 hover:scale-105"
-                aria-label="Scroll right"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                </svg>
-            </button>
+            {/* Scroll Right Button */}
+             {isHoveringContainer && canScrollRight && (
+                 <button
+                    onClick={() => scroll('right')}
+                     className="cursor-pointer absolute right-[-8px] md:right-[-15px] top-[calc(50%_+_10px)] transform -translate-y-1/2 z-20 bg-gray-800 text-white p-2 md:p-3 rounded-full shadow-md transition-all duration-200 hover:bg-gray-600 hover:scale-105 opacity-80 hover:opacity-100"
+                    aria-label="Scroll right"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 md:w-5 md:h-5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                </button>
+            )}
 
+            {/* No Scrollbar Style */}
             <style jsx>{`
-                .no-scrollbar::-webkit-scrollbar {
-                    display: none;
-                }
-                .no-scrollbar {
-                    -ms-overflow-style: none; /* IE and Edge */
-                    scrollbar-width: none; /* Firefox */
-                }
+                .no-scrollbar::-webkit-scrollbar { display: none; }
+                .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
             `}</style>
         </div>
     );
