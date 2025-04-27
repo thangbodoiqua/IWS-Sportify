@@ -12,6 +12,7 @@ const AddAlbumForm = ({ onCancel, onAlbumCreated }) => {
         description: '',
     });
     const [coverFile, setCoverFile] = useState(null);
+    
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
