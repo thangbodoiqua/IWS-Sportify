@@ -9,8 +9,8 @@ import axiosInstance from "../../AxiosInstance";
 import { useNavigate } from 'react-router-dom';
 import Playlist from "./AddToPlaylistForm"; // Import Playlist component
 
-const PlaylistSong = ({ playlist, onBack, onSongRemoved }) => {
-  const { setCurrentSong, backendUrl, fetchPlaylists, playPlaylist } = useContext(AppContext).value; // Lấy hàm playPlaylist
+const PlaylistSong = ({ playlist, onBack, onSongRemoved, fetchPlaylists }) => {
+  const { setCurrentSong, backendUrl, playPlaylist } = useContext(AppContext).value; // Lấy hàm playPlaylist
   const [hoveredSongId, setHoveredSongId] = useState(null);
   const [songs, setSongs] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal xóa bài hát
@@ -125,6 +125,7 @@ const PlaylistSong = ({ playlist, onBack, onSongRemoved }) => {
   };
 
   const handleConfirmDeletePlaylist = async () => {
+    console.log("Deleting playlist with ID:", playlist._id);
     if (!playlist?._id) {
       toast.error("Playlist ID is invalid.");
       return;
@@ -133,6 +134,7 @@ const PlaylistSong = ({ playlist, onBack, onSongRemoved }) => {
       const response = await axiosInstance.delete(
         `${backendUrl}/api/playlist/${playlist._id}`
       );
+      console.log("delete data: " + response.data);
       if (response.data.success) {
         toast.success("Playlist deleted successfully!");
         fetchPlaylists();
@@ -141,7 +143,6 @@ const PlaylistSong = ({ playlist, onBack, onSongRemoved }) => {
         toast.error(response.data.message || "Failed to delete playlist.");
       }
     } catch (error) {
-      console.error("Error deleting playlist:", error);
       toast.error("Failed to delete playlist.");
     } finally {
       setIsDeletePlaylistModalOpen(false); // Đóng modal sau khi thực hiện
@@ -218,25 +219,7 @@ const PlaylistSong = ({ playlist, onBack, onSongRemoved }) => {
           <FaPlay className="text-lg" />
         </button>
 
-        <div className="ml-auto">
-          <button className="text-neutral-400 hover:text-white text-sm flex items-center gap-1 focus:outline-none">
-            Song List
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-4 h-4"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-              />
-            </svg>
-          </button>
-        </div>
+      
       </div>
 
       {songs && songs.length > 0 ? (
@@ -286,13 +269,7 @@ const PlaylistSong = ({ playlist, onBack, onSongRemoved }) => {
                           .padStart(2, "0")}`
                       : ""}
                   </div>
-                  <button
-                    onClick={() => openAddToPlaylistModal(song)} // Mở modal thêm vào playlist
-                    className="text-blue-500 hover:text-blue-400 focus:outline-none"
-                    aria-label={`Add ${song.title} to another playlist`}
-                  >
-                    <FaPlus size={16} />
-                  </button>
+                  
                   <button
                     onClick={() => openModal(song._id, song.title)}
                     className="text-red-500 hover:text-red-400 focus:outline-none"

@@ -8,7 +8,7 @@ const Playlists = ({ onPlaylistSelect, playlists, fetchPlaylists }) => {
     const [isCreatingPlaylist, setIsCreatingPlaylist] = useState(false);
     const { isLoggedIn } = useContext(AppContext).value;
     const playlistListRef = useRef(null);
-
+    
     useEffect(() => {
         if (playlistListRef.current) {
             const shouldScroll = playlistListRef.current.scrollHeight > playlistListRef.current.clientHeight;

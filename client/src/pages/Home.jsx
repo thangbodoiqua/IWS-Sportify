@@ -75,6 +75,7 @@ const Home = () => {
     useEffect(() => {
         fetchPlaylists();
     }, [fetchPlaylists]);
+
       const handlePlaylistSelect = (playlist) => {
         setSelectedPlaylist(playlist);
         setSelectedAlbum(null);
@@ -112,6 +113,7 @@ const Home = () => {
                 <div className="m-4 rounded flex-grow p-4 overflow-y-auto bg-[#121212] h-[80%]">
                     {selectedPlaylist ? (
                         <PlaylistSong
+                            fetchPlaylists={fetchPlaylists}
                             playlist={selectedPlaylist}
                             onBack={handleBackToSongList}
                             onSongRemoved={(removedSongId) => {
@@ -130,7 +132,6 @@ const Home = () => {
                             <FeaturedSongs onOpenPlaylistModal={openPlaylistModal} />
                             <TrendingSong onOpenPlaylistModal={openPlaylistModal} />
                             <MadeForYouSongs onOpenPlaylistModal={openPlaylistModal} />
-                            <h1 className="text-2xl font-bold text-white mt-6">Albums</h1>
                             <AlbumList onAlbumSelect={handleAlbumSelect} />
                         </>
                     )}

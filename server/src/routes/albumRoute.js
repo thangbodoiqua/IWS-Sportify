@@ -1,7 +1,7 @@
 // path: server/src/routes/albumRoute.js
 
 import express from 'express';
-import { adminAuth } from '../middleware/authMiddleWare.js'; // Sử dụng adminAuth để quản lý album
+import { adminAuth } from '../middleware/authMiddleWare.js';
 import {
   createAlbum,
   deleteAlbum,
